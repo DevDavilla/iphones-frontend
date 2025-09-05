@@ -24,7 +24,7 @@ const testimonialsData = [
     id: 3,
     name: "Carla V. Lima",
     text: "Tive uma dúvida no pós-venda e fui prontamente atendida pelo WhatsApp. A equipe é muito atenciosa. Meu iPhone 13 é incrível!",
-    rating: 4,
+    rating: 3,
     avatar: "https://placehold.co/80x80/0A1C2B/FFFFFF?text=CL", // Placeholder para avatar
   },
 ];
