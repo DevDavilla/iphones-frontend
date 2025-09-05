@@ -1,0 +1,229 @@
+/* src/app/dashboard/products/new/new.module.css */
+
+.productForm {
+  background-color: white;
+  padding: 32px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Sombra mais suave */
+  margin-top: 24px;
+}
+
+.formSection {
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--aluralightgray); /* Divisor sutil */
+}
+
+.formSection:last-child {
+  border-bottom: none; /* Remover borda do último bloco */
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.sectionTitle {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--aluradarkblue);
+  margin-bottom: 24px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(280px, 1fr)
+  ); /* Colunas responsivas */
+  gap: 24px; /* Espaço entre os campos */
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--aluradarkgray);
+  margin-bottom: 8px;
+}
+
+.inputField,
+.textareaField,
+.selectField {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--aluralightgray);
+  border-radius: 6px;
+  font-size: 1rem;
+  color: var(--aluradarkblue);
+  background-color: #f9f9f9; /* Fundo levemente cinza */
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.inputField:focus,
+.textareaField:focus,
+.selectField:focus {
+  border-color: var(--alurablue);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Sombra de foco azul da Alura */
+  outline: none;
+}
+
+.textareaField {
+  resize: vertical; /* Permite redimensionar verticalmente */
+  min-height: 100px;
+}
+
+.checkboxGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px; /* Espaço entre os checkboxes */
+  margin-top: 5px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  color: var(--aluradarkgray);
+  cursor: pointer;
+}
+
+.checkboxInput {
+  margin-right: 8px;
+  appearance: none; /* Esconde o checkbox padrão */
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--aluralightgray);
+  border-radius: 4px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.checkboxInput:checked {
+  background-color: var(--alurablue); /* Fundo azul da Alura quando marcado */
+  border-color: var(--alurablue);
+}
+
+.checkboxInput:checked::after {
+  content: "✔"; /* Símbolo de check */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+}
+
+.hintText {
+  font-size: 0.85rem;
+  color: var(--aluradarkgray);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.infoText {
+  font-size: 0.9rem;
+  color: var(--alurablue);
+  margin-top: -10px;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+/* Botões de Ação */
+.formActions {
+  display: flex;
+  justify-content: flex-end; /* Alinha botões à direita */
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--aluralightgray);
+}
+
+.submitButton,
+.cancelButton {
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border: none;
+}
+
+.submitButton {
+  background-color: var(--alurablue);
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.2);
+}
+
+.submitButton:hover {
+  background-color: #0f2d4e; /* Tom mais escuro do azul da Alura no hover */
+  box-shadow: 0 6px 8px rgba(0, 123, 255, 0.3);
+}
+
+.cancelButton {
+  background-color: #e0e0e0; /* Cinza claro */
+  color: var(--aluradarkblue);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cancelButton:hover {
+  background-color: #c9c9c9;
+}
+
+/* Responsividade básica */
+@media (max-width: 768px) {
+  .formGrid {
+    grid-template-columns: 1fr; /* Uma coluna em telas menores */
+  }
+  .mainContainer {
+    padding: 24px;
+  }
+}
+
+.dynamicInputRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px; /* Espaço entre as linhas de input dinâmico */
+}
+
+.dynamicInputRow .inputField {
+  flex-grow: 1; /* Faz o input ocupar o máximo de espaço */
+  margin-bottom: 0; /* Remove margin-bottom padrão do inputField */
+}
+
+.addButton,
+.removeButton {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border: none;
+  flex-shrink: 0; /* Impede que os botões encolham */
+}
+
+.addButton {
+  background-color: var(--alurablue);
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+  margin-top: 8px; /* Espaço acima do botão adicionar */
+}
+
+.addButton:hover {
+  background-color: #0f2d4e;
+}
+
+.removeButton {
+  background-color: #dc3545; /* Vermelho para remover */
+  color: white;
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+}
+
+.removeButton:hover {
+  background-color: #c82333;
+}

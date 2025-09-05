@@ -1,0 +1,246 @@
+/* ===========================
+   details.module.css
+=========================== */
+
+/* Container de detalhes do produto */
+.detailsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+/* Galeria de imagens */
+.imageGallery {
+  flex: 1 1 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mainImage {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  border-radius: 1rem;
+  object-fit: cover;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.mainImage:hover {
+  transform: scale(1.05);
+}
+
+.thumbnailGallery {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.thumbnail {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.thumbnail:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.activeThumbnail {
+  border-color: #3b82f6;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+}
+
+/* Seção de informações do produto */
+.infoSection {
+  flex: 1 1 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Nome do produto */
+.productTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  background-clip: text; /* padrão */
+  -webkit-background-clip: text; /* compatibilidade WebKit */
+  -webkit-text-fill-color: transparent; /* texto transparente para gradiente */
+}
+
+/* Informações do modelo e armazenamento */
+.modelInfo {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Preço original (riscado) */
+.originalPrice {
+  font-size: 1.2rem;
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+
+/* Preço atual com gradiente */
+.currentPrice {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  background-clip: text; /* padrão */
+  -webkit-background-clip: text; /* compatibilidade WebKit */
+  -webkit-text-fill-color: transparent;
+}
+
+/* Parcelamento */
+.installmentOptions {
+  font-size: 1rem;
+  color: #6b7280;
+}
+
+/* Botão Comprar Agora */
+.addToCartButton {
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.addToCartButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(
+    90deg,
+    #6366f1,
+    #3b82f6
+  ); /* efeito hover invertido */
+}
+
+/* Descrição detalhada */
+.productDescription {
+  margin-top: 1.5rem;
+}
+
+.sectionHeading {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.fullDescription {
+  font-size: 1rem;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* Especificações técnicas */
+.specsSection {
+  margin-top: 1.5rem;
+}
+
+.specsSection ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.specsSection li {
+  font-size: 1rem;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+/* Vídeo do produto */
+.videoContainer {
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.videoFrame {
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Mensagens de erro e sem produtos */
+.errorMessage {
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.noProductsMessage {
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+.trustBadges {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--aluralightgray);
+  text-align: center;
+}
+
+.badgesTitle {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--aluradarkblue);
+  margin-bottom: 20px;
+}
+
+.negrito {
+  font-weight: bold;
+}
+
+.badgesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px; /* Espaço entre os selos */
+}
+
+.badgeImage {
+  height: 80px; /* Aumentar um pouco a altura para melhor visibilidade */
+  width: auto; /* Manter proporção */
+  object-fit: contain;
+  /* Adicionar um pouco de padding e borda sutil para dar um "card" visual */
+  padding: 5px 5px;
+  border: 1px solid var(--aluralightgray);
+  border-radius: 6px;
+  background-color: white; /* Fundo branco para o selo */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Sombra leve */
+}
+
+/* Responsividade para os selos */
+@media (max-width: 480px) {
+  .badgeImage {
+    height: 35px; /* Reduzir um pouco em telas muito pequenas */
+  }
+}
+
+/* ===========================
+   Media Queries
+=========================== */
+@media (max-width: 768px) {
+  .detailsContainer {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .thumbnailGallery {
+    justify-content: flex-start;
+  }
+}

@@ -1,0 +1,127 @@
+/* src/app/contact/contact.module.css */
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--aluragray);
+  color: var(--aluradarkblue);
+}
+
+.header {
+  background-color: var(--aluradarkblue);
+  padding: 20px 40px;
+  display: flex;
+  justify-content: center; /* Centraliza o logo */
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.logoLink {
+  display: inline-block;
+  line-height: 0;
+}
+
+.logoImage {
+  height: 60px; /* Tamanho do logo */
+  width: auto;
+  max-width: 200px;
+  object-fit: contain;
+}
+
+.mainContent {
+  flex-grow: 1; /* Faz o conteúdo principal ocupar o espaço restante */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Centraliza verticalmente o conteúdo */
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.pageTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--aluradarkblue);
+  margin-bottom: 15px;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--aluradarkgray);
+  margin-bottom: 40px;
+  max-width: 600px;
+}
+
+.linktree {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Espaço entre os botões */
+  width: 100%;
+  max-width: 450px; /* Largura máxima para a coluna de links */
+  margin-top: 20px;
+}
+
+.linkButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 25px;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.linkButton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.whatsappButton {
+  background-color: #25d366; /* Verde WhatsApp */
+  color: white;
+}
+
+.whatsappButton:hover {
+  background-color: #1da851;
+}
+
+.websiteButton {
+  background-color: var(--alurablue); /* Azul vibrante da Alura */
+  color: white;
+}
+
+.websiteButton:hover {
+  background-color: #0f2d4e;
+}
+
+.socialButton {
+  background-color: #c13584; /* Rosa Instagram */
+  color: white;
+}
+
+.socialButton:hover {
+  background-color: #962f70;
+}
+
+/* Responsividade */
+@media (max-width: 600px) {
+  .pageTitle {
+    font-size: 2rem;
+  }
+  .linkButton {
+    font-size: 1.1rem;
+    padding: 15px 20px;
+  }
+  .header {
+    padding: 15px 20px;
+  }
+  .logoImage {
+    height: 50px;
+  }
+}

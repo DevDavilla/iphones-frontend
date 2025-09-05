@@ -1,0 +1,74 @@
+/* src/components/Toast/Toast.module.css */
+
+.toastContainer {
+  position: fixed; /* Posição fixa na tela */
+  bottom: 20px; /* 20px do fundo */
+  right: 20px; /* 20px da direita */
+  padding: 15px 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  z-index: 1000; /* Garante que fique acima de outros elementos */
+  opacity: 0; /* Começa invisível */
+  transform: translateY(100%); /* Começa fora da tela */
+  animation: slideIn 0.3s forwards, fadeOut 0.3s 2.7s forwards; /* Animações de entrada e saída */
+}
+
+/* Tipos de Toast */
+.success {
+  background-color: #28a745; /* Verde de sucesso */
+}
+
+.error {
+  background-color: #dc3545; /* Vermelho de erro */
+}
+
+.info {
+  background-color: #007bff; /* Azul de informação (alurablue) */
+}
+
+.toastMessage {
+  flex-grow: 1; /* Ocupa o espaço restante */
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 5px;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.closeButton:hover {
+  opacity: 0.7;
+}
+
+/* Animações */
+@keyframes slideIn {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}

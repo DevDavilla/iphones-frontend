@@ -1,0 +1,116 @@
+/* src/app/dashboard/login/login.module.css */
+
+.loginContainer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--aluragray); /* Fundo cinza claro */
+  padding: 20px;
+}
+
+.loginCard {
+  background-color: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  width: 100%;
+  max-width: 400px; /* Largura máxima do card de login */
+  color: var(--aluradarkblue);
+}
+
+.loginTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--alurablue); /* Azul vibrante da Alura */
+}
+
+.loginSubtitle {
+  font-size: 1.1rem;
+  color: var(--aluradarkgray);
+  margin-bottom: 30px;
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formGroup {
+  text-align: left;
+}
+
+.formGroup label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--aluradarkgray);
+}
+
+.inputField {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid var(--aluralightgray);
+  border-radius: 8px;
+  font-size: 1rem;
+  color: var(--aluradarkblue);
+  background-color: #f9f9f9;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.inputField:focus {
+  border-color: var(--alurablue);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+  outline: none;
+}
+
+.loginButton {
+  background-color: var(--alurablue);
+  color: white;
+  padding: 15px 25px;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 20px;
+  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+}
+
+.loginButton:hover:not(:disabled) {
+  background-color: #0f2d4e;
+  box-shadow: 0 6px 12px rgba(0, 123, 255, 0.4);
+}
+
+.loginButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.forgotPassword {
+  margin-top: 20px;
+  font-size: 0.95rem;
+}
+
+.forgotPassword a {
+  color: var(--alurablue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.forgotPassword a:hover {
+  text-decoration: underline;
+}
+
+.loadingText {
+  font-size: 1.1rem;
+  color: var(--aluradarkgray);
+  margin-top: 15px;
+}

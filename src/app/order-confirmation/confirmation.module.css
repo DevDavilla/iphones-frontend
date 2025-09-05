@@ -1,0 +1,98 @@
+/* src/app/order-confirmation/confirmation.module.css */
+
+.confirmationContent {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  background-color: var(--aluragray);
+  color: var(--aluradarkblue);
+}
+
+.confirmationCard {
+  background-color: white;
+  padding: 50px 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 100%;
+}
+
+.confirmationTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--alurablue);
+  margin-bottom: 20px;
+}
+
+.confirmationMessage {
+  font-size: 1.1rem;
+  color: var(--aluradarkgray);
+  line-height: 1.6;
+  margin-bottom: 25px;
+}
+
+.orderIdText {
+  font-size: 1.2rem;
+  color: var(--aluradarkblue);
+  margin-bottom: 30px;
+}
+
+.orderIdText strong {
+  color: var(--alurablue);
+  font-weight: 700;
+}
+
+.actionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.continueShoppingButton,
+.viewOrdersButton {
+  background-color: var(--alurablue);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+}
+
+.continueShoppingButton:hover,
+.viewOrdersButton:hover {
+  background-color: #0f2d4e;
+  box-shadow: 0 6px 12px rgba(0, 123, 255, 0.4);
+}
+
+.viewOrdersButton {
+  background-color: var(--aluradarkgray);
+}
+
+.viewOrdersButton:hover {
+  background-color: #555;
+}
+
+/* Responsividade */
+@media (max-width: 600px) {
+  .confirmationTitle {
+    font-size: 2rem;
+  }
+  .confirmationCard {
+    padding: 30px 20px;
+  }
+  .actionButtons {
+    max-width: 100%;
+  }
+}

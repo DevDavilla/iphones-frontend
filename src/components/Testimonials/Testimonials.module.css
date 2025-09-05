@@ -1,0 +1,96 @@
+/* src/components/Testimonials/Testimonials.module.css */
+
+.testimonialsSection {
+  padding: 60px 20px;
+  background-color: white; /* Fundo branco para a seção */
+  color: var(--aluradarkblue);
+  text-align: center;
+  margin-top: 50px; /* Espaço acima da seção */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Sombra suave */
+}
+
+.sectionTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: var(--aluradarkblue);
+}
+
+.sectionSubtitle {
+  font-size: 1.1rem;
+  color: var(--aluradarkgray);
+  margin-bottom: 40px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.testimonialsGrid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(300px, 1fr)
+  ); /* Grid responsivo */
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.testimonialCard {
+  background-color: var(--aluragray); /* Fundo cinza claro para os cards */
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Alinha o conteúdo à esquerda dentro do card */
+  text-align: left; /* Garante que o texto esteja alinhado à esquerda */
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%; /* Torna a imagem redonda */
+  object-fit: cover;
+  border: 2px solid var(--alurablue); /* Borda azul para o avatar */
+}
+
+.customerInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.customerName {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--aluradarkblue);
+  margin-bottom: 5px;
+}
+
+.rating {
+  color: #ffd700; /* Cor dourada para as estrelas */
+  font-size: 1.1rem;
+}
+
+.testimonialText {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--aluradarkgray);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .sectionTitle {
+    font-size: 2rem;
+  }
+  .testimonialsGrid {
+    grid-template-columns: 1fr; /* Uma coluna em telas menores */
+  }
+}
