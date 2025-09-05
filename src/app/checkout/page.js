@@ -1,7 +1,7 @@
 // src/app/checkout/page.js
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./checkout.module.css";
@@ -24,7 +24,8 @@ import { onAuthStateChanged } from "firebase/auth";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
 
-export default function CheckoutPage() {
+// 🔹 Componente interno que usa `useSearchParams`
+function CheckoutInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const iphoneId = searchParams.get("iphoneId");
@@ -49,7 +50,6 @@ export default function CheckoutPage() {
       if (user) {
         setCurrentUserId(user.uid);
       } else {
-        // Se não há usuário, não pode ter carrinho. Redireciona para a loja.
         showToast(
           "Você precisa selecionar um iPhone para finalizar a compra.",
           "info"
@@ -125,12 +125,11 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Preparar os produtos para o backend
     const productsForOrder = [
       {
         iphoneId: iphone.id,
         name: iphone.nome,
-        quantity: 1, // Sempre 1 para compra direta
+        quantity: 1,
         price: iphone.preco_promocional || iphone.preco_tabela,
         imageUrl:
           iphone.imagens_urls && iphone.imagens_urls.length > 0
@@ -144,13 +143,12 @@ export default function CheckoutPage() {
       cliente_email: formData.email,
       cliente_telefone: formData.telefone,
       cliente_endereco: formData.endereco,
-      produtos: productsForOrder, // Array com o item único
+      produtos: productsForOrder,
       total: total,
-      status: "pendente", // Status inicial do pedido
+      status: "pendente",
     };
 
     try {
-      // Envia o pedido para o backend
       const response = await fetch(`${API_BASE_URL}/api/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -165,25 +163,11 @@ export default function CheckoutPage() {
           "success"
         );
 
-        // --- NOVO: Redirecionamento para o link de pagamento do Mercado Pago ---
-        // Este é um LINK DE PAGAMENTO DE EXEMPLO para o Mercado Pago.
-        // Em um cenário real, você geraria um link dinâmico via API do Mercado Pago
-        // ou usaria um link fixo de um produto/serviço que você criou no seu painel.
-        // O Mercado Pago tem links de pagamento como:
-        // https://mpago.la/xpto ou https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=...
-        // Para testes, pode ser um link de um produto Mercado Pago que você criou no seu dashboard.
-
-        const mercadoPagoPaymentLink = `https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=SEU_ID_DE_PREFERENCIA_AQUI`;
-        // Ou um link mais genérico para testes (pode não funcionar para valores dinâmicos sem API):
         const genericMercadoPagoLink = `https://www.mercadopago.com.br/pagar-online/checkout/v1/redirect?amount=${total.toFixed(
           2
         )}&description=${encodeURIComponent(iphone.nome)}`;
 
-        window.location.href = genericMercadoPagoLink; // Redireciona o usuário para o Mercado Pago
-
-        // Se você quiser a página de confirmação APÓS salvar o pedido E ANTES de ir para o Mercado Pago,
-        // você teria que mudar o fluxo aqui (redirecionar para /order-confirmation e lá ter um botão "Pagar").
-        // Por simplicidade, vamos direto para o Mercado Pago.
+        window.location.href = genericMercadoPagoLink;
       } else {
         showToast(
           "Erro ao finalizar pedido: " + (data.message || "Erro desconhecido."),
@@ -202,6 +186,7 @@ export default function CheckoutPage() {
     }
   };
 
+  // 🔹 Loading
   if (loading) {
     return (
       <div className={globalStoreStyles.container}>
@@ -229,6 +214,7 @@ export default function CheckoutPage() {
     );
   }
 
+  // 🔹 Erro
   if (error) {
     return (
       <div className={globalStoreStyles.container}>
@@ -257,6 +243,7 @@ export default function CheckoutPage() {
     );
   }
 
+  // 🔹 Produto não encontrado
   if (!iphone && !loading) {
     return (
       <div className={globalStoreStyles.container}>
@@ -287,6 +274,7 @@ export default function CheckoutPage() {
     );
   }
 
+  // 🔹 Render principal
   return (
     <div className={globalStoreStyles.container}>
       <header className={globalStoreStyles.header}>
@@ -411,5 +399,14 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// 🔹 Exporta a página com Suspense
+export default function CheckoutPageWrapper() {
+  return (
+    <Suspense fallback={<div>Carregando checkout...</div>}>
+      <CheckoutInner />
+    </Suspense>
   );
 }
