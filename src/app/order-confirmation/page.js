@@ -1,33 +1,19 @@
 "use client";
 
-import { Suspense } from "react";
-import OrderConfirmationContent from "./OrderConfirmationContent";
-
-export default function OrderConfirmationPage() {
-  return (
-    <Suspense fallback={<p>Carregando confirmação...</p>}>
-      <OrderConfirmationContent />
-    </Suspense>
-  );
-}
-"use client";
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation"; // Para ler parâmetros da URL
-import styles from "./confirmation.module.css"; // Estilos específicos da confirmação
-import globalStoreStyles from "../page.module.css"; // Reutiliza header da loja
+import { useSearchParams } from "next/navigation";
+import styles from "./confirmation.module.css";
+import globalStoreStyles from "../page.module.css";
 
-export default function OrderConfirmationContent() {
+function OrderConfirmationContent() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("orderId"); // Obtém o orderId da URL
+  const orderId = searchParams.get("orderId");
 
   const [displayOrderId, setDisplayOrderId] = useState(null);
 
   useEffect(() => {
-    if (orderId) {
-      setDisplayOrderId(orderId);
-    }
+    if (orderId) setDisplayOrderId(orderId);
   }, [orderId]);
 
   return (
@@ -65,13 +51,17 @@ export default function OrderConfirmationContent() {
             <Link href="/" className={styles.continueShoppingButton}>
               Continuar Comprando
             </Link>
-            {/* Futuramente, link para "Meus Pedidos" se houver autenticação de cliente */}
-            {/* <Link href="/my-orders" className={styles.viewOrdersButton}>
-              Ver Meus Pedidos
-            </Link> */}
           </div>
         </div>
       </main>
     </div>
+  );
+}
+
+export default function OrderConfirmationPage() {
+  return (
+    <Suspense fallback={<p>Carregando confirmação...</p>}>
+      <OrderConfirmationContent />
+    </Suspense>
   );
 }
