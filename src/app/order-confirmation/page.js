@@ -1,4 +1,15 @@
-// src/app/order-confirmation/page.js
+"use client";
+
+import { Suspense } from "react";
+import OrderConfirmationContent from "./OrderConfirmationContent";
+
+export default function OrderConfirmationPage() {
+  return (
+    <Suspense fallback={<p>Carregando confirmação...</p>}>
+      <OrderConfirmationContent />
+    </Suspense>
+  );
+}
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -7,7 +18,7 @@ import { useSearchParams } from "next/navigation"; // Para ler parâmetros da UR
 import styles from "./confirmation.module.css"; // Estilos específicos da confirmação
 import globalStoreStyles from "../page.module.css"; // Reutiliza header da loja
 
-export default function OrderConfirmationPage() {
+export default function OrderConfirmationContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId"); // Obtém o orderId da URL
 
