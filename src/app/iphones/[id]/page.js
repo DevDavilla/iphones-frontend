@@ -1,18 +1,20 @@
 // src/app/iphones/[id]/page.js
-"use client"; // Indica que este é um componente do lado do cliente
+"use client";
 
-import React, { useState, useEffect } from "react"; // Importa React e hooks de estado/efeito
-import { useRouter } from "next/navigation"; // Importa useRouter para navegação
-import Link from "next/link"; // Para links internos do Next.js
-import styles from "./details.module.css"; // Estilos específicos para a página de detalhes
-import globalStoreStyles from "../../page.module.css"; // Estilos globais da loja (cabeçalho, container)
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image"; // ✅ Substitui <img> por <Image> para corrigir warnings do Next
+import styles from "./details.module.css";
+import globalStoreStyles from "../../page.module.css";
 import Footer from "../../../components/Footer/Footer";
 import Loader from "../../../components/Loader/Loader";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
 
-export default function iPhoneDetailsPage({ params }) {
+export default function IPhoneDetailsPage({ params }) {
+  // ✅ Corrigido: nome do componente com letra maiúscula
   const router = useRouter();
   const { id } = params;
 
@@ -52,12 +54,11 @@ export default function iPhoneDetailsPage({ params }) {
     fetchIphoneDetails();
   }, [id]);
 
-  // CORRIGIDO: Renomeado de handleBuyNow para handleGoToCheckout
   const handleGoToCheckout = () => {
     if (iphone) {
-      router.push(`/checkout?iphoneId=${iphone.id}`); // Redireciona para /checkout com o ID do iPhone
+      router.push(`/checkout?iphoneId=${iphone.id}`);
     } else {
-      alert("Não foi possível iniciar a compra: iPhone não carregado."); // Fallback caso o iPhone não esteja disponível
+      alert("Não foi possível iniciar a compra: iPhone não carregado.");
     }
   };
 
@@ -66,9 +67,11 @@ export default function iPhoneDetailsPage({ params }) {
       <div className={globalStoreStyles.container}>
         <header className={globalStoreStyles.header}>
           <Link href="/" className={globalStoreStyles.logoLink}>
-            <img
+            <Image
               src="/iphone-logo.png"
               alt="iPhones Pro Store Logo"
+              width={120}
+              height={50}
               className={globalStoreStyles.logoImage}
             />
           </Link>
@@ -91,9 +94,11 @@ export default function iPhoneDetailsPage({ params }) {
       <div className={globalStoreStyles.container}>
         <header className={globalStoreStyles.header}>
           <Link href="/" className={globalStoreStyles.logoLink}>
-            <img
+            <Image
               src="/iphone-logo.png"
               alt="iPhones Pro Store Logo"
+              width={120}
+              height={50}
               className={globalStoreStyles.logoImage}
             />
           </Link>
@@ -121,9 +126,11 @@ export default function iPhoneDetailsPage({ params }) {
       <div className={globalStoreStyles.container}>
         <header className={globalStoreStyles.header}>
           <Link href="/" className={globalStoreStyles.logoLink}>
-            <img
+            <Image
               src="/iphone-logo.png"
               alt="iPhones Pro Store Logo"
+              width={120}
+              height={50}
               className={globalStoreStyles.logoImage}
             />
           </Link>
@@ -150,9 +157,11 @@ export default function iPhoneDetailsPage({ params }) {
     <div className={globalStoreStyles.container}>
       <header className={globalStoreStyles.header}>
         <Link href="/" className={globalStoreStyles.logoLink}>
-          <img
+          <Image
             src="/iphone-logo.png"
             alt="iPhones Pro Store Logo"
+            width={120}
+            height={50}
             className={globalStoreStyles.logoImage}
           />
         </Link>
@@ -168,36 +177,30 @@ export default function iPhoneDetailsPage({ params }) {
 
         <div className={styles.detailsContainer}>
           <div className={styles.imageGallery}>
-            <img
+            <Image
               src={
                 mainImage ||
                 "https://placehold.co/500x500/e0e0e0/333333?text=iPhone"
               }
               alt={iphone.nome}
+              width={500}
+              height={500}
               className={styles.mainImage}
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src =
-                  "https://placehold.co/500x500/e0e0e0/333333?text=iPhone";
-              }}
             />
             <div className={styles.thumbnailGallery}>
               {iphone.imagens_urls &&
                 iphone.imagens_urls.length > 0 &&
                 iphone.imagens_urls.map((url, index) => (
-                  <img
+                  <Image
                     key={index}
                     src={url}
                     alt={`${iphone.nome} - ${index + 1}`}
+                    width={100}
+                    height={100}
                     className={`${styles.thumbnail} ${
                       url === mainImage ? styles.activeThumbnail : ""
                     }`}
                     onClick={() => setMainImage(url)}
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src =
-                        "https://placehold.co/100x100/e0e0e0/333333?text=Img";
-                    }}
                   />
                 ))}
             </div>
@@ -249,7 +252,7 @@ export default function iPhoneDetailsPage({ params }) {
             )}
 
             <button
-              onClick={handleGoToCheckout} // CORRIGIDO: Chama a função com o nome correto
+              onClick={handleGoToCheckout}
               className={styles.addToCartButton}
             >
               Finalizar Compra
@@ -258,34 +261,46 @@ export default function iPhoneDetailsPage({ params }) {
             <div className={styles.trustBadges}>
               <h3 className={styles.badgesTitle}>Compra 100% Segura</h3>
               <div className={styles.badgesGrid}>
-                <img
+                <Image
                   src="https://xadmin.s3.us-east-2.amazonaws.com/1/news/15042/image/7222d1c16ce25b203d0504ea00db3773.jpg"
                   alt="Certificado SSL"
+                  width={80}
+                  height={50}
                   className={styles.badgeImage}
                 />
-                <img
+                <Image
                   src="/compra-segura.jpg"
                   alt="Site Seguro"
+                  width={80}
+                  height={50}
                   className={styles.badgeImage}
                 />
-                <img
+                <Image
                   src="/logo-pagseguro.png"
                   alt="PagSeguro"
+                  width={80}
+                  height={50}
                   className={styles.badgeImage}
                 />
-                <img
+                <Image
                   src="/mercado-pago-seguro.png"
                   alt="Mercado Pago"
+                  width={80}
+                  height={50}
                   className={styles.badgeImage}
                 />
-                <img
+                <Image
                   src="/logo-visa.png"
                   alt="Visa"
+                  width={80}
+                  height={50}
                   className={styles.badgeImage}
                 />
-                <img
+                <Image
                   src="/logo-mastercard.png"
                   alt="Mastercard"
+                  width={80}
+                  height={50}
                   className={styles.badgeImage}
                 />
               </div>
