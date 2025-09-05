@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from "react"; // Adicionado useEffect
 import { useRouter } from "next/navigation"; // Adicionado useRouter
 import styles from "./new.module.css";
-import dashboardStyles from "/Users/Thulio/projeto-iphones/frontend-iphones/src/app/dashboard/dashboard.module.css"; // Ajuste o caminho se necessário
+import dashboardStyles from "../../dashboard.module.css"; // Ajuste o caminho se necessário
 import Link from "next/link";
 import { useToast } from "../../../../components/Toast/ToastContext";
 

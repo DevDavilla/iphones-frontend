@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import styles from "./SobreNos.module.css";
+import styles from "./sobreNos.module.css";
 import { Users, Award, Heart } from "lucide-react";
 
 export default function SobreNosPage() {
