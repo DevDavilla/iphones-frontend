@@ -544,6 +544,7 @@ export default function EditProductPage({ params }) {
                   className={newProductStyles.selectField}
                 >
                   <option value="">Selecione o Modelo</option>
+                  <option value="Max">Max</option>
                   <option value="Pro Max">Pro Max</option>
                   <option value="Pro">Pro</option>
                   <option value="Plus">Plus</option>
