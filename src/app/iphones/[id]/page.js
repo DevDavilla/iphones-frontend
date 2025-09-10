@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image"; // ✅ Substitui <img> por <Image> para corrigir warnings do Next
+import Image from "next/image"; // Mantido para logos e imagens internas
 import styles from "./details.module.css";
 import globalStoreStyles from "../../page.module.css";
 import Footer from "../../../components/Footer/Footer";
@@ -13,7 +13,6 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
 
 export default function IPhoneDetailsPage({ params }) {
-  // ✅ Corrigido: nome do componente com letra maiúscula
   const router = useRouter();
   const { id } = params;
 
@@ -59,6 +58,10 @@ export default function IPhoneDetailsPage({ params }) {
     } else {
       alert("Não foi possível iniciar a compra: iPhone não carregado.");
     }
+  };
+
+  const formatArrayData = (data) => {
+    return Array.isArray(data) ? data.join(", ") : data;
   };
 
   if (loading) {
@@ -152,11 +155,6 @@ export default function IPhoneDetailsPage({ params }) {
     );
   }
 
-  // ✅ Corrigido: Adiciona uma verificação para garantir que o tipo de dado é um array antes de usar o método .join()
-  const formatArrayData = (data) => {
-    return Array.isArray(data) ? data.join(", ") : data;
-  };
-
   return (
     <div className={globalStoreStyles.container}>
       <header className={globalStoreStyles.header}>
@@ -181,7 +179,8 @@ export default function IPhoneDetailsPage({ params }) {
 
         <div className={styles.detailsContainer}>
           <div className={styles.imageGallery}>
-            <Image
+            {/* 🔄 Troquei para <img /> para imagens externas */}
+            <img
               src={
                 mainImage ||
                 "https://placehold.co/500x500/e0e0e0/333333?text=iPhone"
@@ -191,11 +190,12 @@ export default function IPhoneDetailsPage({ params }) {
               height={500}
               className={styles.mainImage}
             />
+
             <div className={styles.thumbnailGallery}>
               {iphone.imagens_urls &&
                 iphone.imagens_urls.length > 0 &&
                 iphone.imagens_urls.map((url, index) => (
-                  <Image
+                  <img
                     key={index}
                     src={url}
                     alt={`${iphone.nome} - ${index + 1}`}
@@ -208,6 +208,7 @@ export default function IPhoneDetailsPage({ params }) {
                   />
                 ))}
             </div>
+
             {iphone.video_url && (
               <div className={styles.videoContainer}>
                 <h3 className={styles.sectionHeading}>Vídeo do Produto</h3>
@@ -230,6 +231,7 @@ export default function IPhoneDetailsPage({ params }) {
             <p className={styles.modelInfo}>
               {iphone.modelo} - {iphone.armazenamento_gb}GB
             </p>
+
             {iphone.preco_promocional ? (
               <>
                 <p className={styles.originalPrice}>
@@ -249,9 +251,9 @@ export default function IPhoneDetailsPage({ params }) {
                 {parseFloat(iphone.preco_tabela).toFixed(2).replace(".", ",")}
               </p>
             )}
+
             {iphone.opcoes_parcelamento && (
               <p className={styles.installmentOptions}>
-                {/* ✅ Corrigido: Converte JSONB para string */}
                 {JSON.stringify(iphone.opcoes_parcelamento)}
               </p>
             )}
@@ -266,8 +268,9 @@ export default function IPhoneDetailsPage({ params }) {
             <div className={styles.trustBadges}>
               <h3 className={styles.badgesTitle}>Compra 100% Segura</h3>
               <div className={styles.badgesGrid}>
+                {/* Mantive <Image /> nas internas */}
                 <Image
-                  src="https://xadmin.s3.us-east-2.amazonaws.com/1/news/15042/image/7222d1c16ce25b203d0504ea00db3773.jpg"
+                  src="/certificado-ssl.png"
                   alt="Certificado SSL"
                   width={80}
                   height={50}
@@ -339,7 +342,6 @@ export default function IPhoneDetailsPage({ params }) {
                     {iphone.capacidade_bateria}
                   </li>
                 )}
-                {/* ✅ Corrigido: Usa a nova função de formatação para arrays */}
                 {iphone.tipo_conexao && (
                   <li>
                     <span className={styles.negrito}>Conectividade:</span>{" "}
@@ -352,7 +354,6 @@ export default function IPhoneDetailsPage({ params }) {
                     {iphone.tipo_conector}
                   </li>
                 )}
-                {/* ✅ Corrigido: Usa a nova função de formatação para arrays */}
                 {iphone.recursos_camera && (
                   <li>
                     <span className={styles.negrito}>Câmera:</span>{" "}
@@ -371,7 +372,6 @@ export default function IPhoneDetailsPage({ params }) {
                     {iphone.sistema_operacional}
                   </li>
                 )}
-                {/* ✅ Corrigido: Usa a nova função de formatação para arrays */}
                 {iphone.biometria && (
                   <li>
                     <span className={styles.negrito}>Biometria:</span>{" "}
@@ -406,7 +406,6 @@ export default function IPhoneDetailsPage({ params }) {
                   <li>
                     {" "}
                     <span className={styles.negrito}>Cores:</span>{" "}
-                    {/* ✅ Corrigido: Usa a nova função de formatação para arrays */}
                     {formatArrayData(iphone.cores_disponiveis)}
                   </li>
                 )}
@@ -415,7 +414,6 @@ export default function IPhoneDetailsPage({ params }) {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }
