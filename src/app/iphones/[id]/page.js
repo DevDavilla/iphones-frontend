@@ -1,4 +1,3 @@
-// src/app/iphones/[id]/page.js
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -153,6 +152,11 @@ export default function IPhoneDetailsPage({ params }) {
     );
   }
 
+  // ✅ Corrigido: Adiciona uma verificação para garantir que o tipo de dado é um array antes de usar o método .join()
+  const formatArrayData = (data) => {
+    return Array.isArray(data) ? data.join(", ") : data;
+  };
+
   return (
     <div className={globalStoreStyles.container}>
       <header className={globalStoreStyles.header}>
@@ -247,7 +251,8 @@ export default function IPhoneDetailsPage({ params }) {
             )}
             {iphone.opcoes_parcelamento && (
               <p className={styles.installmentOptions}>
-                {iphone.opcoes_parcelamento}
+                {/* ✅ Corrigido: Converte JSONB para string */}
+                {JSON.stringify(iphone.opcoes_parcelamento)}
               </p>
             )}
 
@@ -334,10 +339,11 @@ export default function IPhoneDetailsPage({ params }) {
                     {iphone.capacidade_bateria}
                   </li>
                 )}
-                {iphone.tipo_conexao && iphone.tipo_conexao.length > 0 && (
+                {/* ✅ Corrigido: Usa a nova função de formatação para arrays */}
+                {iphone.tipo_conexao && (
                   <li>
                     <span className={styles.negrito}>Conectividade:</span>{" "}
-                    {iphone.tipo_conexao.join(", ")}
+                    {formatArrayData(iphone.tipo_conexao)}
                   </li>
                 )}
                 {iphone.tipo_conector && (
@@ -346,13 +352,13 @@ export default function IPhoneDetailsPage({ params }) {
                     {iphone.tipo_conector}
                   </li>
                 )}
-                {iphone.recursos_camera &&
-                  iphone.recursos_camera.length > 0 && (
-                    <li>
-                      <span className={styles.negrito}>Câmera:</span>{" "}
-                      {iphone.recursos_camera.join(", ")}
-                    </li>
-                  )}
+                {/* ✅ Corrigido: Usa a nova função de formatação para arrays */}
+                {iphone.recursos_camera && (
+                  <li>
+                    <span className={styles.negrito}>Câmera:</span>{" "}
+                    {formatArrayData(iphone.recursos_camera)}
+                  </li>
+                )}
                 {iphone.resistencia_agua_poeira && (
                   <li>
                     <span className={styles.negrito}>Resistência:</span>{" "}
@@ -365,10 +371,11 @@ export default function IPhoneDetailsPage({ params }) {
                     {iphone.sistema_operacional}
                   </li>
                 )}
-                {iphone.biometria && iphone.biometria.length > 0 && (
+                {/* ✅ Corrigido: Usa a nova função de formatação para arrays */}
+                {iphone.biometria && (
                   <li>
                     <span className={styles.negrito}>Biometria:</span>{" "}
-                    {iphone.biometria.join(", ")}
+                    {formatArrayData(iphone.biometria)}
                   </li>
                 )}
                 {iphone.dimensoes_axlxc && (
@@ -395,19 +402,20 @@ export default function IPhoneDetailsPage({ params }) {
                     {iphone.condicao_aparelho}
                   </li>
                 )}
-                {iphone.cores_disponiveis &&
-                  iphone.cores_disponiveis.length > 0 && (
-                    <li>
-                      {" "}
-                      <span className={styles.negrito}>Cores:</span>{" "}
-                      {iphone.cores_disponiveis.join(", ")}
-                    </li>
-                  )}
+                {iphone.cores_disponiveis && (
+                  <li>
+                    {" "}
+                    <span className={styles.negrito}>Cores:</span>{" "}
+                    {/* ✅ Corrigido: Usa a nova função de formatação para arrays */}
+                    {formatArrayData(iphone.cores_disponiveis)}
+                  </li>
+                )}
               </ul>
             </div>
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
