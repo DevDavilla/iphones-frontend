@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image"; // Mantido para logos e imagens internas
+import Image from "next/image";
 import styles from "./details.module.css";
 import globalStoreStyles from "../../page.module.css";
 import Footer from "../../../components/Footer/Footer";
@@ -34,16 +34,35 @@ export default function IPhoneDetailsPage({ params }) {
         const data = await response.json();
 
         if (response.ok) {
-          setIphone(data.iphone);
-          if (data.iphone.imagens_urls && data.iphone.imagens_urls.length > 0) {
-            setMainImage(data.iphone.imagens_urls[0]);
+          // ✅ CORREÇÃO: Converte campos JSONB para objetos/arrays
+          const parsedIphone = {
+            ...data.iphone,
+            cores_disponiveis: JSON.parse(
+              data.iphone.cores_disponiveis || "[]"
+            ),
+            opcoes_parcelamento: JSON.parse(
+              data.iphone.opcoes_parcelamento || "{}"
+            ),
+            imagens_urls: JSON.parse(data.iphone.imagens_urls || "[]"),
+            tipo_conexao: JSON.parse(data.iphone.tipo_conexao || "[]"),
+            recursos_camera: JSON.parse(data.iphone.recursos_camera || "[]"),
+            biometria: JSON.parse(data.iphone.biometria || "[]"),
+          };
+
+          setIphone(parsedIphone);
+
+          if (
+            parsedIphone.imagens_urls &&
+            parsedIphone.imagens_urls.length > 0
+          ) {
+            setMainImage(parsedIphone.imagens_urls[0]);
           }
         } else {
           setError(data.message || "Erro ao carregar detalhes do iPhone.");
         }
       } catch (err) {
         console.error(`Erro ao buscar detalhes do iPhone ${id}:`, err);
-        setError("Erro de conexão com o servidor.");
+        setError("Erro de conexão com o servidor ou parse de dados inválido.");
       } finally {
         setLoading(false);
       }
@@ -58,10 +77,6 @@ export default function IPhoneDetailsPage({ params }) {
     } else {
       alert("Não foi possível iniciar a compra: iPhone não carregado.");
     }
-  };
-
-  const formatArrayData = (data) => {
-    return Array.isArray(data) ? data.join(", ") : data;
   };
 
   if (loading) {
@@ -155,6 +170,11 @@ export default function IPhoneDetailsPage({ params }) {
     );
   }
 
+  // ✅ CORREÇÃO: Função para garantir que apenas arrays sejam formatados
+  const formatArrayData = (data) => {
+    return Array.isArray(data) ? data.join(", ") : data;
+  };
+
   return (
     <div className={globalStoreStyles.container}>
       <header className={globalStoreStyles.header}>
@@ -179,8 +199,7 @@ export default function IPhoneDetailsPage({ params }) {
 
         <div className={styles.detailsContainer}>
           <div className={styles.imageGallery}>
-            {/* 🔄 Troquei para <img /> para imagens externas */}
-            <img
+            <Image
               src={
                 mainImage ||
                 "https://placehold.co/500x500/e0e0e0/333333?text=iPhone"
@@ -190,12 +209,10 @@ export default function IPhoneDetailsPage({ params }) {
               height={500}
               className={styles.mainImage}
             />
-
             <div className={styles.thumbnailGallery}>
               {iphone.imagens_urls &&
-                iphone.imagens_urls.length > 0 &&
                 iphone.imagens_urls.map((url, index) => (
-                  <img
+                  <Image
                     key={index}
                     src={url}
                     alt={`${iphone.nome} - ${index + 1}`}
@@ -208,7 +225,6 @@ export default function IPhoneDetailsPage({ params }) {
                   />
                 ))}
             </div>
-
             {iphone.video_url && (
               <div className={styles.videoContainer}>
                 <h3 className={styles.sectionHeading}>Vídeo do Produto</h3>
@@ -231,7 +247,6 @@ export default function IPhoneDetailsPage({ params }) {
             <p className={styles.modelInfo}>
               {iphone.modelo} - {iphone.armazenamento_gb}GB
             </p>
-
             {iphone.preco_promocional ? (
               <>
                 <p className={styles.originalPrice}>
@@ -251,10 +266,13 @@ export default function IPhoneDetailsPage({ params }) {
                 {parseFloat(iphone.preco_tabela).toFixed(2).replace(".", ",")}
               </p>
             )}
-
             {iphone.opcoes_parcelamento && (
               <p className={styles.installmentOptions}>
-                {JSON.stringify(iphone.opcoes_parcelamento)}
+                {`Em até ${
+                  iphone.opcoes_parcelamento.parcelas
+                } de R$ ${parseFloat(iphone.opcoes_parcelamento.valor)
+                  .toFixed(2)
+                  .replace(".", ",")}`}
               </p>
             )}
 
@@ -268,7 +286,6 @@ export default function IPhoneDetailsPage({ params }) {
             <div className={styles.trustBadges}>
               <h3 className={styles.badgesTitle}>Compra 100% Segura</h3>
               <div className={styles.badgesGrid}>
-                {/* Mantive <Image /> nas internas */}
                 <Image
                   src="/certificado-ssl.png"
                   alt="Certificado SSL"
@@ -342,6 +359,7 @@ export default function IPhoneDetailsPage({ params }) {
                     {iphone.capacidade_bateria}
                   </li>
                 )}
+                {/* ✅ Corrigido: Usa a nova função de formatação para arrays */}
                 {iphone.tipo_conexao && (
                   <li>
                     <span className={styles.negrito}>Conectividade:</span>{" "}
@@ -354,6 +372,7 @@ export default function IPhoneDetailsPage({ params }) {
                     {iphone.tipo_conector}
                   </li>
                 )}
+                {/* ✅ Corrigido: Usa a nova função de formatação para arrays */}
                 {iphone.recursos_camera && (
                   <li>
                     <span className={styles.negrito}>Câmera:</span>{" "}
@@ -372,6 +391,7 @@ export default function IPhoneDetailsPage({ params }) {
                     {iphone.sistema_operacional}
                   </li>
                 )}
+                {/* ✅ Corrigido: Usa a nova função de formatação para arrays */}
                 {iphone.biometria && (
                   <li>
                     <span className={styles.negrito}>Biometria:</span>{" "}
@@ -406,6 +426,7 @@ export default function IPhoneDetailsPage({ params }) {
                   <li>
                     {" "}
                     <span className={styles.negrito}>Cores:</span>{" "}
+                    {/* ✅ Corrigido: Usa a nova função de formatação para arrays */}
                     {formatArrayData(iphone.cores_disponiveis)}
                   </li>
                 )}
