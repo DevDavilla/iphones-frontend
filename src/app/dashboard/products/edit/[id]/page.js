@@ -1,4 +1,3 @@
-// src/app/dashboard/products/edit/[id]/page.js
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -7,6 +6,7 @@ import Link from "next/link";
 import newProductStyles from "../../new/new.module.css"; // Reutiliza estilos do formulário de novo produto
 import dashboardStyles from "../../../dashboard.module.css"; // Estilos do layout do dashboard
 import { useToast } from "../../../../../components/Toast/ToastContext"; // Importa useToast
+import Image from "next/image"; // Importa o componente Image
 
 // Importa auth do Firebase e onAuthStateChanged
 import { auth } from "../../../../firebase/config";
@@ -18,7 +18,7 @@ const API_BASE_URL =
 
 export default function EditProductPage({ params }) {
   const router = useRouter();
-  const { id } = React.use(params); // Advertência de params.id será ignorada por enquanto.
+  const { id } = params;
   const { showToast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -125,15 +125,27 @@ export default function EditProductPage({ params }) {
 
         if (response.ok) {
           const iphoneData = data.iphone;
+
+          // ✅ CORREÇÃO: Converte strings JSONB em objetos/arrays
+          const parseIfJSON = (value) => {
+            try {
+              return typeof value === "string" ? JSON.parse(value) : value;
+            } catch (e) {
+              console.error("Erro ao fazer parse do JSON:", e);
+              return value;
+            }
+          };
+
           setFormData({
             nome: iphoneData.nome || "",
             modelo: iphoneData.modelo || "",
             armazenamento_gb: String(iphoneData.armazenamento_gb || ""),
-            cores_disponiveis: iphoneData.cores_disponiveis || [],
+            cores_disponiveis: parseIfJSON(iphoneData.cores_disponiveis) || [],
             condicao_aparelho: iphoneData.condicao_aparelho || "",
             preco_tabela: String(iphoneData.preco_tabela || ""),
             preco_promocional: String(iphoneData.preco_promocional || ""),
-            opcoes_parcelamento: iphoneData.opcoes_parcelamento || "",
+            opcoes_parcelamento:
+              parseIfJSON(iphoneData.opcoes_parcelamento) || "",
             estoque: String(iphoneData.estoque || ""),
             sku: iphoneData.sku || "",
             descricao_detalhada: iphoneData.descricao_detalhada || "",
@@ -142,13 +154,13 @@ export default function EditProductPage({ params }) {
             ),
             processador_chip: iphoneData.processador_chip || "",
             capacidade_bateria: iphoneData.capacidade_bateria || "",
-            tipo_conexao: iphoneData.tipo_conexao || [],
+            tipo_conexao: parseIfJSON(iphoneData.tipo_conexao) || [],
             tipo_conector: iphoneData.tipo_conector || "",
-            recursos_camera: iphoneData.recursos_camera || [],
+            recursos_camera: parseIfJSON(iphoneData.recursos_camera) || [],
             resistencia_agua_poeira: iphoneData.resistencia_agua_poeira || "",
             sistema_operacional: iphoneData.sistema_operacional || "",
-            biometria: iphoneData.biometria || [],
-            imagens_urls: iphoneData.imagens_urls || [],
+            biometria: parseIfJSON(iphoneData.biometria) || [],
+            imagens_urls: parseIfJSON(iphoneData.imagens_urls) || [],
             video_url: iphoneData.video_url || "",
             dimensoes_axlxc: iphoneData.dimensoes_axlxc || "",
             peso_g: String(iphoneData.peso_g || ""),
@@ -366,9 +378,11 @@ export default function EditProductPage({ params }) {
       <aside className={dashboardStyles.sidebar}>
         <div className={dashboardStyles.sidebarHeader}>
           <Link href="/dashboard" className={dashboardStyles.logoLinkDashboard}>
-            <img
+            <Image
               src="/iphone-logo.png"
               alt="iPhones Pro Dashboard Logo"
+              width={120}
+              height={50}
               className={dashboardStyles.logoImageDashboard}
             />
           </Link>
@@ -568,7 +582,11 @@ export default function EditProductPage({ params }) {
                   type="text"
                   id="opcoes_parcelamento"
                   name="opcoes_parcelamento"
-                  value={formData.opcoes_parcelamento}
+                  value={
+                    typeof formData.opcoes_parcelamento === "string"
+                      ? formData.opcoes_parcelamento
+                      : JSON.stringify(formData.opcoes_parcelamento)
+                  }
                   onChange={handleChange}
                   className={newProductStyles.inputField}
                 />
