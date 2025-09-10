@@ -16,6 +16,40 @@ import { onAuthStateChanged, signOut } from "firebase/auth"; // Adicionado signO
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
 
+// -------------------- Helpers --------------------
+// Tenta dar parse em JSON, mas retorna o valor original caso não seja JSON válido.
+const parseIfJSON = (value) => {
+  if (value === null || value === undefined) return value;
+  if (typeof value === "string") {
+    try {
+      return JSON.parse(value);
+    } catch (e) {
+      // Não é JSON — retorna a string original
+      return value;
+    }
+  }
+  return value;
+};
+
+// Garante que o retorno seja um array (mesmo que o dado venha como string/objeto)
+const ensureArray = (value) => {
+  if (Array.isArray(value)) return value;
+  if (value === null || value === undefined) return [];
+  if (typeof value === "string") {
+    try {
+      const p = JSON.parse(value);
+      return Array.isArray(p) ? p : value ? [value] : [];
+    } catch {
+      return value ? [value] : [];
+    }
+  }
+  if (typeof value === "object") {
+    // se for um objeto, não faz sentido mapear — retorna array vazio
+    return [];
+  }
+  return [];
+};
+
 export default function EditProductPage({ params }) {
   const router = useRouter();
   const { id } = params;
@@ -49,6 +83,7 @@ export default function EditProductPage({ params }) {
     garantia_meses: "",
     status_produto: "Ativo",
   });
+
   const [loading, setLoading] = useState(true); // Carregamento dos dados do iPhone
   const [loadingAuth, setLoadingAuth] = useState(true); // Carregamento da autenticação
   const [user, setUser] = useState(null); // Estado para o usuário logado
@@ -73,26 +108,42 @@ export default function EditProductPage({ params }) {
 
   // Funções auxiliares para gerenciar arrays de campos
   const handleAddItem = (fieldName) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [fieldName]: [...prevData[fieldName], ""],
-    }));
+    setFormData((prevData) => {
+      const prev = prevData[fieldName];
+      const base = Array.isArray(prev) ? prev : prev ? [prev] : [];
+      return {
+        ...prevData,
+        [fieldName]: [...base, ""],
+      };
+    });
   };
 
   const handleRemoveItem = (fieldName, index) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [fieldName]: prevData[fieldName].filter((_, i) => i !== index),
-    }));
+    setFormData((prevData) => {
+      const prev = Array.isArray(prevData[fieldName])
+        ? prevData[fieldName]
+        : prevData[fieldName]
+        ? [prevData[fieldName]]
+        : [];
+      return {
+        ...prevData,
+        [fieldName]: prev.filter((_, i) => i !== index),
+      };
+    });
   };
 
   const handleItemChange = (fieldName, index, value) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [fieldName]: prevData[fieldName].map((item, i) =>
-        i === index ? value : item
-      ),
-    }));
+    setFormData((prevData) => {
+      const prev = Array.isArray(prevData[fieldName])
+        ? prevData[fieldName]
+        : prevData[fieldName]
+        ? [prevData[fieldName]]
+        : [];
+      return {
+        ...prevData,
+        [fieldName]: prev.map((item, i) => (i === index ? value : item)),
+      };
+    });
   };
 
   // handleChange para campos de texto e select
@@ -124,28 +175,35 @@ export default function EditProductPage({ params }) {
         const data = await response.json();
 
         if (response.ok) {
-          const iphoneData = data.iphone;
+          const iphoneData = data.iphone || {};
 
-          // ✅ CORREÇÃO: Converte strings JSONB em objetos/arrays
-          const parseIfJSON = (value) => {
-            try {
-              return typeof value === "string" ? JSON.parse(value) : value;
-            } catch (e) {
-              console.error("Erro ao fazer parse do JSON:", e);
-              return value;
-            }
-          };
+          // Converte/normaliza os campos que podem vir como string JSON
+          const cores = ensureArray(parseIfJSON(iphoneData.cores_disponiveis));
+          const tipoConexao = ensureArray(parseIfJSON(iphoneData.tipo_conexao));
+          const recursosCamera = ensureArray(
+            parseIfJSON(iphoneData.recursos_camera)
+          );
+          const biometria = ensureArray(parseIfJSON(iphoneData.biometria));
+          const imagens = ensureArray(parseIfJSON(iphoneData.imagens_urls));
+
+          // opcoes_parcelamento pode ser string ou objeto/array — queremos apresentar como string no input
+          const opcoesParsed = parseIfJSON(iphoneData.opcoes_parcelamento);
+          const opcoesParcelamentoStr =
+            typeof opcoesParsed === "string"
+              ? opcoesParsed
+              : opcoesParsed
+              ? JSON.stringify(opcoesParsed)
+              : "";
 
           setFormData({
             nome: iphoneData.nome || "",
             modelo: iphoneData.modelo || "",
             armazenamento_gb: String(iphoneData.armazenamento_gb || ""),
-            cores_disponiveis: parseIfJSON(iphoneData.cores_disponiveis) || [],
+            cores_disponiveis: cores,
             condicao_aparelho: iphoneData.condicao_aparelho || "",
             preco_tabela: String(iphoneData.preco_tabela || ""),
             preco_promocional: String(iphoneData.preco_promocional || ""),
-            opcoes_parcelamento:
-              parseIfJSON(iphoneData.opcoes_parcelamento) || "",
+            opcoes_parcelamento: opcoesParcelamentoStr,
             estoque: String(iphoneData.estoque || ""),
             sku: iphoneData.sku || "",
             descricao_detalhada: iphoneData.descricao_detalhada || "",
@@ -154,13 +212,13 @@ export default function EditProductPage({ params }) {
             ),
             processador_chip: iphoneData.processador_chip || "",
             capacidade_bateria: iphoneData.capacidade_bateria || "",
-            tipo_conexao: parseIfJSON(iphoneData.tipo_conexao) || [],
+            tipo_conexao: tipoConexao,
             tipo_conector: iphoneData.tipo_conector || "",
-            recursos_camera: parseIfJSON(iphoneData.recursos_camera) || [],
+            recursos_camera: recursosCamera,
             resistencia_agua_poeira: iphoneData.resistencia_agua_poeira || "",
             sistema_operacional: iphoneData.sistema_operacional || "",
-            biometria: parseIfJSON(iphoneData.biometria) || [],
-            imagens_urls: parseIfJSON(iphoneData.imagens_urls) || [],
+            biometria: biometria,
+            imagens_urls: imagens,
             video_url: iphoneData.video_url || "",
             dimensoes_axlxc: iphoneData.dimensoes_axlxc || "",
             peso_g: String(iphoneData.peso_g || ""),
@@ -186,29 +244,59 @@ export default function EditProductPage({ params }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const dataToSend = {
-      ...formData,
-      armazenamento_gb: Number(formData.armazenamento_gb),
-      preco_tabela: Number(formData.preco_tabela),
-      preco_promocional: formData.preco_promocional
+    // Normaliza os campos antes de enviar
+    const normalized = { ...formData };
+
+    normalized.armazenamento_gb =
+      formData.armazenamento_gb !== "" &&
+      !isNaN(Number(formData.armazenamento_gb))
+        ? Number(formData.armazenamento_gb)
+        : null;
+    normalized.preco_tabela =
+      formData.preco_tabela !== "" && !isNaN(Number(formData.preco_tabela))
+        ? Number(formData.preco_tabela)
+        : null;
+    normalized.preco_promocional =
+      formData.preco_promocional !== "" &&
+      !isNaN(Number(formData.preco_promocional))
         ? Number(formData.preco_promocional)
-        : null,
-      estoque: Number(formData.estoque),
-      tamanho_tela_polegadas: formData.tamanho_tela_polegadas
+        : null;
+    normalized.estoque =
+      formData.estoque !== "" && !isNaN(Number(formData.estoque))
+        ? Number(formData.estoque)
+        : null;
+    normalized.tamanho_tela_polegadas =
+      formData.tamanho_tela_polegadas !== "" &&
+      !isNaN(Number(formData.tamanho_tela_polegadas))
         ? Number(formData.tamanho_tela_polegadas)
-        : null,
-      peso_g: formData.peso_g ? Number(formData.peso_g) : null,
-      garantia_meses: formData.garantia_meses
+        : null;
+    normalized.peso_g =
+      formData.peso_g !== "" && !isNaN(Number(formData.peso_g))
+        ? Number(formData.peso_g)
+        : null;
+    normalized.garantia_meses =
+      formData.garantia_meses !== "" && !isNaN(Number(formData.garantia_meses))
         ? Number(formData.garantia_meses)
-        : null,
-    };
+        : null;
+
+    // Garante arrays válidos para os campos que o backend espera como arrays
+    normalized.cores_disponiveis = ensureArray(formData.cores_disponiveis);
+    normalized.tipo_conexao = ensureArray(formData.tipo_conexao);
+    normalized.recursos_camera = ensureArray(formData.recursos_camera);
+    normalized.biometria = ensureArray(formData.biometria);
+    normalized.imagens_urls = ensureArray(formData.imagens_urls);
+
+    // Tenta transformar opcoes_parcelamento em JSON caso seja uma string JSON
+    const opcParsed = parseIfJSON(formData.opcoes_parcelamento);
+    normalized.opcoes_parcelamento =
+      typeof opcParsed === "string" ? opcParsed : opcParsed;
 
     try {
       // Usa a API_BASE_URL definida para a requisição
       const response = await fetch(`${API_BASE_URL}/api/iphones/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dataToSend),
+        body: JSON.stringify(normalized),
       });
 
       const data = await response.json();
@@ -487,7 +575,10 @@ export default function EditProductPage({ params }) {
               {/* Cores Disponíveis - Agora com múltiplos inputs */}
               <div className={newProductStyles.formGroup}>
                 <label>Cores Disponíveis</label>
-                {formData.cores_disponiveis.map((color, index) => (
+                {(Array.isArray(formData.cores_disponiveis)
+                  ? formData.cores_disponiveis
+                  : []
+                ).map((color, index) => (
                   <div key={index} className={newProductStyles.dynamicInputRow}>
                     <input
                       type="text"
@@ -683,7 +774,10 @@ export default function EditProductPage({ params }) {
               {/* Tipo de Conexão - Agora com múltiplos inputs */}
               <div className={newProductStyles.formGroup}>
                 <label>Tipo de Conexão</label>
-                {formData.tipo_conexao.map((conn, index) => (
+                {(Array.isArray(formData.tipo_conexao)
+                  ? formData.tipo_conexao
+                  : []
+                ).map((conn, index) => (
                   <div key={index} className={newProductStyles.dynamicInputRow}>
                     <input
                       type="text"
@@ -728,7 +822,10 @@ export default function EditProductPage({ params }) {
               {/* Recursos da Câmera - Agora com múltiplos inputs */}
               <div className={newProductStyles.formGroup}>
                 <label>Recursos da Câmera</label>
-                {formData.recursos_camera.map((feature, index) => (
+                {(Array.isArray(formData.recursos_camera)
+                  ? formData.recursos_camera
+                  : []
+                ).map((feature, index) => (
                   <div key={index} className={newProductStyles.dynamicInputRow}>
                     <input
                       type="text"
@@ -787,7 +884,10 @@ export default function EditProductPage({ params }) {
               {/* Biometria - Agora com múltiplos inputs */}
               <div className={newProductStyles.formGroup}>
                 <label>Biometria</label>
-                {formData.biometria.map((bio, index) => (
+                {(Array.isArray(formData.biometria)
+                  ? formData.biometria
+                  : []
+                ).map((bio, index) => (
                   <div key={index} className={newProductStyles.dynamicInputRow}>
                     <input
                       type="text"
@@ -855,10 +955,13 @@ export default function EditProductPage({ params }) {
           {/* Bloco 5: Mídia (Imagens e Vídeos) */}
           <section className={newProductStyles.formSection}>
             <h2 className={newProductStyles.sectionTitle}>Mídia (Opcional)</h2>
-            {/* Imagens URLs - Agora com múltiplos inputs */}
+            {/* Imagens URLs - Agora com múltiplos inputs e preview */}
             <div className={newProductStyles.formGroup}>
               <label>URLs das Imagens</label>
-              {formData.imagens_urls.map((url, index) => (
+              {(Array.isArray(formData.imagens_urls)
+                ? formData.imagens_urls
+                : []
+              ).map((url, index) => (
                 <div key={index} className={newProductStyles.dynamicInputRow}>
                   <input
                     type="text"
@@ -869,6 +972,19 @@ export default function EditProductPage({ params }) {
                     className={newProductStyles.inputField}
                     placeholder="Ex: http://img.com/iphone.jpg"
                   />
+                  <div style={{ width: 80, height: 60, marginLeft: 8 }}>
+                    {url ? (
+                      // Preview com <img> para evitar passar pelo next/image
+                      <img
+                        src={url}
+                        alt={`preview-${index}`}
+                        style={{ width: 80, height: 60, objectFit: "cover" }}
+                        onError={(e) =>
+                          (e.currentTarget.style.display = "none")
+                        }
+                      />
+                    ) : null}
+                  </div>
                   <button
                     type="button"
                     onClick={() => handleRemoveItem("imagens_urls", index)}
