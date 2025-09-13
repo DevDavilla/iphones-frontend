@@ -368,7 +368,7 @@ export default function IPhoneDetailsPage({ params }) {
                 )}
                 {iphone.sistema_operacional && (
                   <li>
-                    <span className={styles.negrito}>OS:</span>{" "}
+                    <span className={styles.negrito}>Sistema Operacional:</span>{" "}
                     {iphone.sistema_operacional}
                   </li>
                 )}

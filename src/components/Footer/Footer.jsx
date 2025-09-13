@@ -127,7 +127,7 @@ const Footer = () => {
       {/* Parte de baixo: segurança + direitos */}
       <div className={styles.footerBottom}>
         <p>
-          &copy; {new Date().getFullYear()} DevDavilla. Todos os direitos
+          &copy; {new Date().getFullYear()} iPhones PRO Store. Todos os direitos
           reservados.
         </p>
         <p className={styles.securityText}>
