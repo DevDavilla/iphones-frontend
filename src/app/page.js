@@ -146,11 +146,6 @@ export default function HomePage() {
             className={styles.logoImage}
           />
         </Link>
-        <nav className={styles.mainNav}>
-          <Link href="/dashboard" className={styles.dashboardButton}>
-            Dashboard
-          </Link>
-        </nav>
       </header>
 
       <div className={styles.content}>

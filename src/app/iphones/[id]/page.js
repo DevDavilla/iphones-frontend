@@ -265,11 +265,6 @@ export default function IPhoneDetailsPage({ params }) {
             className={globalStoreStyles.logoImage}
           />
         </Link>
-        <nav className={globalStoreStyles.mainNav}>
-          <Link href="/dashboard" className={globalStoreStyles.navLink}>
-            Dashboard
-          </Link>
-        </nav>
       </header>
 
       <div className={globalStoreStyles.content}>
