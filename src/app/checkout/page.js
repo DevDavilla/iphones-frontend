@@ -11,6 +11,7 @@ import { useToast } from "../../components/Toast/ToastContext";
 
 import { auth } from "../firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
+import { itemAxisPredicate } from "recharts/types/state/selectors/axisSelectors";
 
 // 🔹 Componente interno que usa `useSearchParams`
 function CheckoutInner() {
@@ -120,7 +121,7 @@ function CheckoutInner() {
       const message = `
 🛒 *Novo Pedido*
 
-📱 Produto: ${iphone.nome}
+📱 Produto: ${item.name}
 📦 Quantidade: 1
 💰 Preço: R$ ${precoFormatado}
 
