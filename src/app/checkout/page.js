@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "./checkout.module.css";
 import globalStoreStyles from "../page.module.css";
-import Footer from "../../components/Footer";
+import Footer from "../../components/Footer/Footer";
 import Loader from "../../components/Loader/Loader";
 import { useToast } from "../../components/Toast/ToastContext";
 
