@@ -1,42 +1,27 @@
-// src/app/checkout/page.js
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import styles from "./checkout.module.css";
 import globalStoreStyles from "../page.module.css";
-import Loader from "../../components/Loader/Loader";
-import { useToast } from "../../components/Toast/ToastContext";
+import Footer from "../components/Footer/Footer";
+import Loader from "../components/Loader/Loader";
+import { useToast } from "../components/Toast/ToastContext";
 
-// Importa Firestore para carregar itens do carrinho (se necessário, ou simulamos)
-import { db, auth, appId } from "../firebase/config";
-import {
-  collection,
-  query,
-  onSnapshot,
-  doc,
-  deleteDoc,
-} from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
-
-// Define a base da URL da API.
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
 
-// 🔹 Componente interno que usa `useSearchParams`
-function CheckoutInner() {
+export default function CheckoutPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const iphoneId = searchParams.get("iphoneId");
   const { showToast } = useToast();
 
-  const [iphone, setIphone] = useState(null);
+  // Estados para gerenciar o estado da página
   const [loading, setLoading] = useState(true);
+  const [iphone, setIphone] = useState(null);
   const [error, setError] = useState(null);
-  const [currentUserId, setCurrentUserId] = useState(null);
-  const [isProcessingOrder, setIsProcessingOrder] = useState(false);
 
+  // Estado do formulário de dados do cliente
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
@@ -44,54 +29,38 @@ function CheckoutInner() {
     endereco: "",
   });
 
-  // Listener para o userId do Firebase (para carregar o carrinho)
+  // Efeito para buscar os detalhes do iPhone ao carregar a página
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setCurrentUserId(user.uid);
-      } else {
-        showToast(
-          "Você precisa selecionar um iPhone para finalizar a compra.",
-          "info"
-        );
-        router.push("/");
-      }
-    });
-    return () => unsubscribeAuth();
-  }, [router, showToast]);
+    // Acessa o ID do iPhone através da URL (query params)
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get("iphoneId");
 
-  // Efeito para buscar os detalhes do iPhone quando a página de checkout carrega
-  useEffect(() => {
-    if (!iphoneId) {
-      showToast("Nenhum iPhone selecionado para compra.", "error");
+    if (!id) {
+      showToast("Nenhum iPhone selecionado para a compra.", "error");
       router.push("/");
       return;
     }
 
     const fetchIphoneDetails = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/iphones/${iphoneId}`);
+        const response = await fetch(`${API_BASE_URL}/api/iphones/${id}`);
         const data = await response.json();
 
         if (response.ok) {
           setIphone(data.iphone);
         } else {
-          setError(
-            data.message || "Erro ao carregar detalhes do iPhone para checkout."
-          );
+          setError(data.message || "Erro ao carregar detalhes do iPhone.");
         }
       } catch (err) {
-        console.error(`Erro ao buscar iPhone ${iphoneId} para checkout:`, err);
-        setError("Erro de conexão ao carregar iPhone para checkout.");
+        console.error(`Erro ao buscar detalhes do iPhone ${id}:`, err);
+        setError("Erro de conexão com o servidor.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchIphoneDetails();
-  }, [iphoneId, router, showToast]);
-
-  const total = iphone ? iphone.preco_promocional || iphone.preco_tabela : 0;
+  }, [router, showToast]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -103,13 +72,6 @@ function CheckoutInner() {
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
-    setIsProcessingOrder(true);
-
-    if (!iphone) {
-      showToast("Nenhum iPhone disponível para finalizar a compra.", "error");
-      setIsProcessingOrder(false);
-      return;
-    }
 
     if (
       !formData.nome ||
@@ -121,175 +83,96 @@ function CheckoutInner() {
         "Por favor, preencha todos os seus dados para finalizar a compra.",
         "error"
       );
-      setIsProcessingOrder(false);
       return;
     }
 
-    const productsForOrder = [
-      {
-        iphoneId: iphone.id,
-        name: iphone.nome,
-        quantity: 1,
-        price: iphone.preco_promocional || iphone.preco_tabela,
-        imageUrl:
-          iphone.imagens_urls && iphone.imagens_urls.length > 0
-            ? iphone.imagens_urls[0]
-            : "https://placehold.co/100x100/e0e0e0/333333?text=iPhone",
-      },
-    ];
+    // Constrói a mensagem para o WhatsApp
+    const whatsappNumber = "5511999999999"; // Substitua pelo seu número de WhatsApp real
+    const message = `Olá! Tenho interesse no iPhone ${iphone.nome} - ${
+      iphone.armazenamento_gb
+    }GB, pelo preço de R$ ${parseFloat(
+      iphone.preco_promocional || iphone.preco_tabela
+    )
+      .toFixed(2)
+      .replace(".", ",")}.
+    
+Meus dados para a compra são:
+Nome: ${formData.nome}
+Email: ${formData.email}
+Telefone: ${formData.telefone}
+Endereço: ${formData.endereco}`;
 
-    const orderData = {
-      cliente_nome: formData.nome,
-      cliente_email: formData.email,
-      cliente_telefone: formData.telefone,
-      cliente_endereco: formData.endereco,
-      produtos: productsForOrder,
-      total: total,
-      status: "pendente",
-    };
+    const whatsappLink = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(
+      message
+    )}`;
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/orders`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        showToast(
-          "Pedido registrado com sucesso! Redirecionando para o pagamento...",
-          "success"
-        );
-
-        const genericMercadoPagoLink = `https://www.mercadopago.com.br/pagar-online/checkout/v1/redirect?amount=${total.toFixed(
-          2
-        )}&description=${encodeURIComponent(iphone.nome)}`;
-
-        window.location.href = genericMercadoPagoLink;
-      } else {
-        showToast(
-          "Erro ao finalizar pedido: " + (data.message || "Erro desconhecido."),
-          "error"
-        );
-        console.error("Detalhes do erro do pedido:", data.error);
-      }
-    } catch (error) {
-      console.error("Erro na requisição de finalização do pedido:", error);
-      showToast(
-        "Erro de conexão ao finalizar o pedido. Tente novamente.",
-        "error"
-      );
-    } finally {
-      setIsProcessingOrder(false);
-    }
+    // Redireciona o usuário para o WhatsApp
+    window.open(whatsappLink, "_blank");
   };
 
-  // 🔹 Loading
+  // Renderizações condicionais
   if (loading) {
     return (
       <div className={globalStoreStyles.container}>
         <header className={globalStoreStyles.header}>
           <Link href="/" className={globalStoreStyles.logoLink}>
             <img
-              src="/iphone-logo.png"
+              src="/sua-logo-da-loja.png"
               alt="iPhones Pro Store Logo"
               className={globalStoreStyles.logoImage}
             />
           </Link>
-          <nav className={globalStoreStyles.mainNav}>
-            <Link href="/dashboard" className={globalStoreStyles.navLink}>
-              Dashboard
-            </Link>
-          </nav>
+          <nav className={globalStoreStyles.mainNav}></nav>
         </header>
         <div className={globalStoreStyles.content}>
           <h2 className={globalStoreStyles.pageTitle}>
-            Carregando Checkout...
+            Carregando Detalhes do Pedido...
           </h2>
           <Loader />
         </div>
+        <Footer />
       </div>
     );
   }
 
-  // 🔹 Erro
-  if (error) {
+  if (error || !iphone) {
     return (
       <div className={globalStoreStyles.container}>
         <header className={globalStoreStyles.header}>
           <Link href="/" className={globalStoreStyles.logoLink}>
             <img
-              src="/iphone-logo.png"
+              src="/sua-logo-da-loja.png"
               alt="iPhones Pro Store Logo"
               className={globalStoreStyles.logoImage}
             />
           </Link>
-          <nav className={globalStoreStyles.mainNav}>
-            <Link href="/dashboard" className={globalStoreStyles.navLink}>
-              Dashboard
-            </Link>
-          </nav>
+          <nav className={globalStoreStyles.mainNav}></nav>
         </header>
         <div className={globalStoreStyles.content}>
           <h2 className={globalStoreStyles.pageTitle}>Erro no Checkout</h2>
-          <p className={globalStoreStyles.errorMessage}>Erro: {error}</p>
+          <p className={globalStoreStyles.errorMessage}>
+            Erro: {error || "iPhone não encontrado para o checkout."}
+          </p>
           <p className={globalStoreStyles.noProductsMessage}>
             Voltar para a <Link href="/">loja</Link>.
           </p>
         </div>
+        <Footer />
       </div>
     );
   }
 
-  // 🔹 Produto não encontrado
-  if (!iphone && !loading) {
-    return (
-      <div className={globalStoreStyles.container}>
-        <header className={globalStoreStyles.header}>
-          <Link href="/" className={globalStoreStyles.logoLink}>
-            <img
-              src="/iphone-logo.png"
-              alt="iPhones Pro Store Logo"
-              className={globalStoreStyles.logoImage}
-            />
-          </Link>
-          <nav className={globalStoreStyles.mainNav}>
-            <Link href="/dashboard" className={globalStoreStyles.navLink}>
-              Dashboard
-            </Link>
-          </nav>
-        </header>
-        <div className={globalStoreStyles.content}>
-          <h2 className={globalStoreStyles.pageTitle}>
-            iPhone não encontrado para Checkout.
-          </h2>
-          <p className={globalStoreStyles.noProductsMessage}>
-            O produto selecionado não foi encontrado. Voltar para a{" "}
-            <Link href="/">loja</Link>.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // 🔹 Render principal
   return (
     <div className={globalStoreStyles.container}>
       <header className={globalStoreStyles.header}>
         <Link href="/" className={globalStoreStyles.logoLink}>
           <img
-            src="/iphone-logo.png"
-            alt="iPhones Pro Stopre Logo"
+            src="/sua-logo-da-loja.png"
+            alt="iPhones Pro Store Logo"
             className={globalStoreStyles.logoImage}
           />
         </Link>
-        <nav className={globalStoreStyles.mainNav}>
-          <Link href="/dashboard" className={globalStoreStyles.navLink}>
-            Dashboard
-          </Link>
-        </nav>
+        <nav className={globalStoreStyles.mainNav}></nav>
       </header>
 
       <div className={globalStoreStyles.content}>
@@ -349,64 +232,47 @@ function CheckoutInner() {
               ></textarea>
             </div>
 
-            <button
-              type="submit"
-              className={styles.placeOrderButton}
-              disabled={isProcessingOrder}
-            >
-              {isProcessingOrder ? "Processando..." : "Finalizar Pedido"}
+            <button type="submit" className={styles.placeOrderButton}>
+              Finalizar Pedido (WhatsApp)
             </button>
           </form>
 
           <div className={styles.orderSummary}>
             <h3 className={styles.sectionTitle}>Resumo do Pedido</h3>
-            {iphone && (
-              <div className={styles.summaryItems}>
-                <div className={styles.summaryItem}>
-                  <img
-                    src={
-                      iphone.imagens_urls?.[0] ||
-                      "https://placehold.co/60x60/e0e0e0/333333?text=iPhone"
-                    }
-                    alt={iphone.nome}
-                    className={styles.summaryItemImage}
-                  />
-                  <div className={styles.summaryItemDetails}>
-                    <p className={styles.summaryItemName}>{iphone.nome}</p>
-                    <p className={styles.summaryItemQuantity}>Quantidade: 1</p>
-                    <p className={styles.summaryItemPrice}>
-                      R${" "}
-                      {parseFloat(
-                        iphone.preco_promocional || iphone.preco_tabela
-                      )
-                        .toFixed(2)
-                        .replace(".", ",")}
-                    </p>
-                  </div>
+            <div className={styles.summaryItems}>
+              <div className={styles.summaryItem}>
+                <img
+                  src={iphone?.imagens_urls?.[0]}
+                  alt={iphone?.nome}
+                  className={styles.summaryItemImage}
+                />
+                <div className={styles.summaryItemDetails}>
+                  <p className={styles.summaryItemName}>{iphone?.nome}</p>
+                  <p className={styles.summaryItemQuantity}>Quantidade: 1</p>
+                  <p className={styles.summaryItemPrice}>
+                    R${" "}
+                    {parseFloat(
+                      iphone?.preco_promocional || iphone?.preco_tabela
+                    )
+                      .toFixed(2)
+                      .replace(".", ",")}
+                  </p>
                 </div>
               </div>
-            )}
+            </div>
             <div className={styles.summaryTotalRow}>
               <span>Total:</span>
               <span>
                 R${" "}
-                {total
-                  ? parseFloat(total).toFixed(2).replace(".", ",")
-                  : "0,00"}
+                {parseFloat(iphone?.preco_promocional || iphone?.preco_tabela)
+                  .toFixed(2)
+                  .replace(".", ",")}
               </span>
             </div>
           </div>
         </div>
       </div>
+      <Footer />
     </div>
-  );
-}
-
-// 🔹 Exporta a página com Suspense
-export default function CheckoutPageWrapper() {
-  return (
-    <Suspense fallback={<div>Carregando checkout...</div>}>
-      <CheckoutInner />
-    </Suspense>
   );
 }
