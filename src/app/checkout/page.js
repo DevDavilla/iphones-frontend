@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "./checkout.module.css";
 import globalStoreStyles from "../page.module.css";
-import Footer from "../components/Footer/Footer";
-import Loader from "../components/Loader/Loader";
-import { useToast } from "../components/Toast/ToastContext";
+import Footer from "../../components/Footer";
+import Loader from "../../components/Loader/Loader";
+import { useToast } from "../../components/Toast/ToastContext";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
