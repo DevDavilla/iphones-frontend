@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image"; // Mantido para logos e imagens internas
@@ -14,7 +14,7 @@ const API_BASE_URL =
 
 export default function IPhoneDetailsPage({ params }) {
   const router = useRouter();
-  const { id } = params;
+  const { id } = params || {};
 
   const [iphone, setIphone] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -34,9 +34,12 @@ export default function IPhoneDetailsPage({ params }) {
         const data = await response.json();
 
         if (response.ok) {
-          setIphone(data.iphone);
-          if (data.iphone.imagens_urls && data.iphone.imagens_urls.length > 0) {
-            setMainImage(data.iphone.imagens_urls[0]);
+          // API pode retornar { iphone: { ... } } ou diretamente o objeto
+          const phone = data.iphone ? data.iphone : data;
+          setIphone(phone);
+
+          if (phone && phone.imagens_urls && phone.imagens_urls.length > 0) {
+            setMainImage(phone.imagens_urls[0]);
           }
         } else {
           setError(data.message || "Erro ao carregar detalhes do iPhone.");
@@ -60,23 +63,102 @@ export default function IPhoneDetailsPage({ params }) {
     }
   };
 
-  // 🔄 Função melhorada para não exibir campos vazios
+  /**
+   * Função robusta para normalizar/formatar campos que podem chegar:
+   * - string normal
+   * - string com JSON escapado ("{\"Face ID\"}")
+   * - array []
+   * - objeto {}
+   * - number / boolean
+   *
+   * Retorna:
+   * - string formatada (ex: "Face ID", "Azul, Verde")
+   * - null quando não houver dados úteis (para ocultar a linha)
+   */
   const formatArrayData = (data) => {
-    if (!data) return null;
+    if (data === null || data === undefined) return null;
 
-    if (Array.isArray(data)) {
-      return data.length > 0 ? data.join(", ") : null;
+    // números e booleanos: converte para string
+    if (typeof data === "number" || typeof data === "boolean") {
+      // trata 0 como valor válido (se você não quiser mostrar 0, ajuste aqui)
+      return String(data);
     }
 
-    if (typeof data === "object") {
-      return Object.keys(data).length > 0 ? JSON.stringify(data) : null;
-    }
-
+    // strings
     if (typeof data === "string") {
-      return data.trim() !== "" ? data : null;
+      const trimmed = data.trim();
+      if (trimmed === "") return null;
+
+      // tenta detectar JSON válido (array ou objeto ou mesmo string JSON)
+      if (
+        trimmed.startsWith("{") ||
+        trimmed.startsWith("[") ||
+        trimmed.startsWith('"') ||
+        trimmed.startsWith("'") ||
+        /\\\"/.test(trimmed) // strings com escape
+      ) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          // delega ao próprio formatArrayData para tratar parsed
+          return formatArrayData(parsed);
+        } catch (e) {
+          // fallback: limpar caracteres de escape e chaves/brackets soltos
+          // ex.: "{\"Face ID\"}" -> Face ID
+          const cleaned = trimmed
+            .replace(/\\+/g, "") // remove backslashes
+            .replace(/^\{/, "")
+            .replace(/\}$/, "")
+            .replace(/^\[/, "")
+            .replace(/\]$/, "")
+            .replace(/^"+|"+$/g, "")
+            .replace(/^'+|'+$/g, "")
+            .trim();
+          return cleaned === "" ? null : cleaned;
+        }
+      }
+
+      return trimmed;
     }
 
-    return data;
+    // array
+    if (Array.isArray(data)) {
+      const arr = data
+        .map((item) => {
+          if (item === null || item === undefined) return null;
+          if (typeof item === "object") {
+            // objeto dentro do array -> pegar valores
+            const v = Object.values(item)
+              .map((vv) => (vv === null || vv === undefined ? "" : String(vv)))
+              .filter(Boolean)
+              .join(", ");
+            return v || null;
+          }
+          return String(item).trim();
+        })
+        .filter(Boolean);
+
+      return arr.length > 0 ? arr.join(", ") : null;
+    }
+
+    // objeto simples
+    if (typeof data === "object") {
+      const vals = Object.values(data)
+        .map((v) => {
+          if (v === null || v === undefined) return null;
+          if (typeof v === "object") return JSON.stringify(v);
+          return String(v).trim();
+        })
+        .filter(Boolean);
+
+      return vals.length > 0 ? vals.join(", ") : null;
+    }
+
+    // fallback
+    try {
+      return String(data);
+    } catch {
+      return null;
+    }
   };
 
   if (loading) {
@@ -170,6 +252,22 @@ export default function IPhoneDetailsPage({ params }) {
     );
   }
 
+  // Normaliza/formatar todas as specs que podem vir como objetos/arrays/strings
+  const specTela = formatArrayData(iphone.tamanho_tela_polegadas);
+  const specChip = formatArrayData(iphone.processador_chip);
+  const specBateria = formatArrayData(iphone.capacidade_bateria);
+  const specConectividade = formatArrayData(iphone.tipo_conexao);
+  const specConector = formatArrayData(iphone.tipo_conector);
+  const specCamera = formatArrayData(iphone.recursos_camera);
+  const specResistencia = formatArrayData(iphone.resistencia_agua_poeira);
+  const specSO = formatArrayData(iphone.sistema_operacional);
+  const specBiometria = formatArrayData(iphone.biometria);
+  const specDimensoes = formatArrayData(iphone.dimensoes_axlxc);
+  const specPeso = formatArrayData(iphone.peso_g);
+  const specGarantia = formatArrayData(iphone.garantia_meses);
+  const specCondicao = formatArrayData(iphone.condicao_aparelho);
+  const specCores = formatArrayData(iphone.cores_disponiveis);
+
   return (
     <div className={globalStoreStyles.container}>
       <header className={globalStoreStyles.header}>
@@ -194,7 +292,7 @@ export default function IPhoneDetailsPage({ params }) {
 
         <div className={styles.detailsContainer}>
           <div className={styles.imageGallery}>
-            {/* 🔄 Troquei para <img /> para imagens externas */}
+            {/* <img /> usado para imagens externas */}
             <img
               src={
                 mainImage ||
@@ -208,6 +306,7 @@ export default function IPhoneDetailsPage({ params }) {
 
             <div className={styles.thumbnailGallery}>
               {iphone.imagens_urls &&
+                Array.isArray(iphone.imagens_urls) &&
                 iphone.imagens_urls.length > 0 &&
                 iphone.imagens_urls.map((url, index) => (
                   <img
@@ -269,7 +368,8 @@ export default function IPhoneDetailsPage({ params }) {
 
             {iphone.opcoes_parcelamento && (
               <p className={styles.installmentOptions}>
-                {JSON.stringify(iphone.opcoes_parcelamento)}
+                {formatArrayData(iphone.opcoes_parcelamento) ||
+                  JSON.stringify(iphone.opcoes_parcelamento)}
               </p>
             )}
 
@@ -338,89 +438,84 @@ export default function IPhoneDetailsPage({ params }) {
             <div className={styles.specsSection}>
               <h3 className={styles.sectionHeading}>Especificações Técnicas</h3>
               <ul>
-                {formatArrayData(iphone.tamanho_tela_polegadas) && (
+                {specTela && (
                   <li>
-                    <span className={styles.negrito}>Tela:</span>{" "}
-                    {iphone.tamanho_tela_polegadas} polegadas
+                    <span className={styles.negrito}>Tela:</span> {specTela}{" "}
+                    polegadas
                   </li>
                 )}
-                {formatArrayData(iphone.processador_chip) && (
+                {specChip && (
                   <li>
-                    <span className={styles.negrito}>Chip:</span>{" "}
-                    {iphone.processador_chip}
+                    <span className={styles.negrito}>Chip:</span> {specChip}
                   </li>
                 )}
-                {formatArrayData(iphone.capacidade_bateria) && (
+                {specBateria && (
                   <li>
                     <span className={styles.negrito}>Bateria:</span>{" "}
-                    {iphone.capacidade_bateria}
+                    {specBateria}
                   </li>
                 )}
-                {formatArrayData(iphone.tipo_conexao) && (
+                {specConectividade && (
                   <li>
                     <span className={styles.negrito}>Conectividade:</span>{" "}
-                    {formatArrayData(iphone.tipo_conexao)}
+                    {specConectividade}
                   </li>
                 )}
-                {formatArrayData(iphone.tipo_conector) && (
+                {specConector && (
                   <li>
                     <span className={styles.negrito}>Conector:</span>{" "}
-                    {iphone.tipo_conector}
+                    {specConector}
                   </li>
                 )}
-                {formatArrayData(iphone.recursos_camera) && (
+                {specCamera && (
                   <li>
-                    <span className={styles.negrito}>Câmera:</span>{" "}
-                    {formatArrayData(iphone.recursos_camera)}
+                    <span className={styles.negrito}>Câmera:</span> {specCamera}
                   </li>
                 )}
-                {formatArrayData(iphone.resistencia_agua_poeira) && (
+                {specResistencia && (
                   <li>
                     <span className={styles.negrito}>Resistência:</span>{" "}
-                    {iphone.resistencia_agua_poeira}
+                    {specResistencia}
                   </li>
                 )}
-                {formatArrayData(iphone.sistema_operacional) && (
+                {specSO && (
                   <li>
                     <span className={styles.negrito}>Sistema Operacional:</span>{" "}
-                    {iphone.sistema_operacional}
+                    {specSO}
                   </li>
                 )}
-                {formatArrayData(iphone.biometria) && (
+                {specBiometria && (
                   <li>
                     <span className={styles.negrito}>Biometria:</span>{" "}
-                    {formatArrayData(iphone.biometria)}
+                    {specBiometria}
                   </li>
                 )}
-                {formatArrayData(iphone.dimensoes_axlxc) && (
+                {specDimensoes && (
                   <li>
                     <span className={styles.negrito}>Dimensões (AxLxP):</span>{" "}
-                    {iphone.dimensoes_axlxc} cm
+                    {specDimensoes} cm
                   </li>
                 )}
-                {formatArrayData(iphone.peso_g) && (
+                {specPeso && (
                   <li>
-                    <span className={styles.negrito}>Peso:</span>{" "}
-                    {iphone.peso_g}g
+                    <span className={styles.negrito}>Peso:</span> {specPeso}g
                   </li>
                 )}
-                {formatArrayData(iphone.garantia_meses) && (
+                {specGarantia && (
                   <li>
                     <span className={styles.negrito}>Garantia:</span>{" "}
-                    {iphone.garantia_meses} meses
+                    {specGarantia} meses
                   </li>
                 )}
-                {formatArrayData(iphone.condicao_aparelho) && (
+                {specCondicao && (
                   <li>
                     <span className={styles.negrito}>Condição:</span>{" "}
-                    {iphone.condicao_aparelho}
+                    {specCondicao}
                   </li>
                 )}
-                {formatArrayData(iphone.cores_disponiveis) && (
+                {specCores && (
                   <li>
-                    {" "}
-                    <span className={styles.negrito}>Cores:</span>{" "}
-                    {formatArrayData(iphone.cores_disponiveis)}
+                    <span className={styles.negrito}>Cores:</span> {specCores}
                   </li>
                 )}
               </ul>

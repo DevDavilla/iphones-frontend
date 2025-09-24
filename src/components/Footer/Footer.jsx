@@ -66,14 +66,14 @@ const Footer = () => {
             <br />
             WhatsApp:{" "}
             <a
-              href="https://wa.me/5511999999999"
+              href="https://wa.me/5511950887080"
               target="_blank"
               rel="noopener noreferrer"
             >
-              (11) 99999-9999
+              (11) 95088-7080
             </a>
             <br />
-            Endereço: Rua dos iPhones, 123 - São Paulo/SP
+            Endereço: Rua Santa Ifigênia 600, Loja 17, São Paulo/SP
           </p>
 
           {/* Redes Sociais relevantes para vendas */}
