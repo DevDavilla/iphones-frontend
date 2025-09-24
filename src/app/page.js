@@ -97,11 +97,6 @@ export default function HomePage() {
               className={styles.logoImage}
             />
           </Link>
-          <nav className={styles.mainNav}>
-            <Link href="/dashboard" className={styles.dashboardButton}>
-              Dashboard
-            </Link>
-          </nav>
         </header>
         <div className={styles.content}>
           <h2 className={styles.pageTitle}>Carregando iPhones...</h2>
@@ -122,11 +117,6 @@ export default function HomePage() {
               className={styles.logoImage}
             />
           </Link>
-          <nav className={styles.mainNav}>
-            <Link href="/dashboard" className={styles.dashboardButton}>
-              Dashboard
-            </Link>
-          </nav>
         </header>
         <div className={styles.content}>
           <h2 className={styles.pageTitle}>Erro ao carregar iPhones</h2>

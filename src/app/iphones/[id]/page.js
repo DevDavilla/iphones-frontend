@@ -174,11 +174,6 @@ export default function IPhoneDetailsPage({ params }) {
               className={globalStoreStyles.logoImage}
             />
           </Link>
-          <nav className={globalStoreStyles.mainNav}>
-            <Link href="/dashboard" className={globalStoreStyles.navLink}>
-              Dashboard
-            </Link>
-          </nav>
         </header>
         <div className={globalStoreStyles.content}>
           <h2 className={globalStoreStyles.pageTitle}>Detalhes do iPhone</h2>
@@ -201,11 +196,6 @@ export default function IPhoneDetailsPage({ params }) {
               className={globalStoreStyles.logoImage}
             />
           </Link>
-          <nav className={globalStoreStyles.mainNav}>
-            <Link href="/dashboard" className={globalStoreStyles.navLink}>
-              Dashboard
-            </Link>
-          </nav>
         </header>
         <div className={globalStoreStyles.content}>
           <h2 className={globalStoreStyles.pageTitle}>
@@ -233,11 +223,6 @@ export default function IPhoneDetailsPage({ params }) {
               className={globalStoreStyles.logoImage}
             />
           </Link>
-          <nav className={globalStoreStyles.mainNav}>
-            <Link href="/dashboard" className={globalStoreStyles.navLink}>
-              Dashboard
-            </Link>
-          </nav>
         </header>
         <div className={globalStoreStyles.content}>
           <h2 className={globalStoreStyles.pageTitle}>
