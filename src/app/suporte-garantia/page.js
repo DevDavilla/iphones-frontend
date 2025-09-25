@@ -41,7 +41,7 @@ export default function SuporteGarantiaPage() {
   };
 
   // Defina seu contato real aqui
-  const WHATSAPP_NUMBER = "5511999999999";
+  const WHATSAPP_NUMBER = "5511950887080";
   const whatsappLink = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(
     "Olá! Preciso de ajuda com suporte/garantia."
   )}`;
@@ -134,11 +134,11 @@ export default function SuporteGarantiaPage() {
         <div className={styles.contactCard}>
           <div className={styles.contactRow}>
             <Phone size={18} />
-            <span>(11) 99999-9999</span>
+            <span>(11) 95088-7080</span>
           </div>
           <div className={styles.contactRow}>
             <Mail size={18} />
-            <span>suporte@iphonespro.com.br</span>
+            <span>contato@iphonespro.com.br</span>
           </div>
           <Link href={whatsappLink} target="_blank" className={styles.ctaWhats}>
             <MessageSquare size={18} />
