@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "next/image"; // Mantido para logos e imagens internas
 import styles from "./details.module.css";
 import globalStoreStyles from "../../page.module.css";
 import Footer from "../../../components/Footer/Footer";
@@ -74,40 +74,76 @@ export default function IPhoneDetailsPage({ params }) {
   const formatArrayData = (data) => {
     if (data === null || data === undefined) return null;
 
-    if (typeof data === "number" || typeof data === "boolean")
+    if (typeof data === "number" || typeof data === "boolean") {
       return String(data);
+    }
 
     if (typeof data === "string") {
       const trimmed = data.trim();
-      if (!trimmed) return null;
-      try {
-        if (trimmed.startsWith("{") || trimmed.startsWith("["))
-          return formatArrayData(JSON.parse(trimmed));
-      } catch {}
+      if (trimmed === "") return null;
+
+      if (
+        trimmed.startsWith("{") ||
+        trimmed.startsWith("[") ||
+        trimmed.startsWith('"') ||
+        trimmed.startsWith("'") ||
+        /\\\"/.test(trimmed)
+      ) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          return formatArrayData(parsed);
+        } catch (e) {
+          const cleaned = trimmed
+            .replace(/\\+/g, "")
+            .replace(/^\{/, "")
+            .replace(/\}$/, "")
+            .replace(/^\[/, "")
+            .replace(/\]$/, "")
+            .replace(/^"+|"+$/g, "")
+            .replace(/^'+|'+$/g, "")
+            .trim();
+          return cleaned === "" ? null : cleaned;
+        }
+      }
+
       return trimmed;
     }
 
     if (Array.isArray(data)) {
       const arr = data
-        .map((item) =>
-          item
-            ? typeof item === "object"
-              ? Object.values(item).join(", ")
-              : String(item)
-            : null
-        )
+        .map((item) => {
+          if (item === null || item === undefined) return null;
+          if (typeof item === "object") {
+            const v = Object.values(item)
+              .map((vv) => (vv === null || vv === undefined ? "" : String(vv)))
+              .filter(Boolean)
+              .join(", ");
+            return v || null;
+          }
+          return String(item).trim();
+        })
         .filter(Boolean);
+
       return arr.length > 0 ? arr.join(", ") : null;
     }
 
     if (typeof data === "object") {
       const vals = Object.values(data)
-        .map((v) => (v ? String(v) : null))
+        .map((v) => {
+          if (v === null || v === undefined) return null;
+          if (typeof v === "object") return JSON.stringify(v);
+          return String(v).trim();
+        })
         .filter(Boolean);
+
       return vals.length > 0 ? vals.join(", ") : null;
     }
 
-    return String(data);
+    try {
+      return String(data);
+    } catch {
+      return null;
+    }
   };
 
   if (loading) {
@@ -132,7 +168,7 @@ export default function IPhoneDetailsPage({ params }) {
     );
   }
 
-  if (error || !iphone) {
+  if (error) {
     return (
       <div className={globalStoreStyles.container}>
         <header className={globalStoreStyles.header}>
@@ -148,9 +184,9 @@ export default function IPhoneDetailsPage({ params }) {
         </header>
         <div className={globalStoreStyles.content}>
           <h2 className={globalStoreStyles.pageTitle}>
-            {error ? "Erro ao carregar iPhone" : "iPhone não encontrado."}
+            Erro ao carregar iPhone
           </h2>
-          <p className={globalStoreStyles.errorMessage}>{error}</p>
+          <p className={globalStoreStyles.errorMessage}>Erro: {error}</p>
           <p className={globalStoreStyles.noProductsMessage}>
             Voltar para a <Link href="/">loja</Link>.
           </p>
@@ -159,23 +195,48 @@ export default function IPhoneDetailsPage({ params }) {
     );
   }
 
+  if (!iphone) {
+    return (
+      <div className={globalStoreStyles.container}>
+        <header className={globalStoreStyles.header}>
+          <Link href="/" className={globalStoreStyles.logoLink}>
+            <Image
+              src="/iphone-logo.png"
+              alt="iPhones Pro Store Logo"
+              width={120}
+              height={50}
+              className={globalStoreStyles.logoImage}
+            />
+          </Link>
+        </header>
+        <div className={globalStoreStyles.content}>
+          <h2 className={globalStoreStyles.pageTitle}>
+            iPhone não encontrado.
+          </h2>
+          <p className={globalStoreStyles.noProductsMessage}>
+            O produto que você procura não existe ou foi removido. Voltar para a{" "}
+            <Link href="/">loja</Link>.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   // Normaliza specs
-  const specs = {
-    Tela: formatArrayData(iphone.tamanho_tela_polegadas),
-    Chip: formatArrayData(iphone.processador_chip),
-    Bateria: formatArrayData(iphone.capacidade_bateria),
-    Conectividade: formatArrayData(iphone.tipo_conexao),
-    Conector: formatArrayData(iphone.tipo_conector),
-    Câmera: formatArrayData(iphone.recursos_camera),
-    Resistência: formatArrayData(iphone.resistencia_agua_poeira),
-    Sistema: formatArrayData(iphone.sistema_operacional),
-    Biometria: formatArrayData(iphone.biometria),
-    Dimensões: formatArrayData(iphone.dimensoes_axlxc),
-    Peso: formatArrayData(iphone.peso_g),
-    Garantia: formatArrayData(iphone.garantia_meses),
-    Condição: formatArrayData(iphone.condicao_aparelho),
-    Cores: formatArrayData(iphone.cores_disponiveis),
-  };
+  const specTela = formatArrayData(iphone.tamanho_tela_polegadas);
+  const specChip = formatArrayData(iphone.processador_chip);
+  const specBateria = formatArrayData(iphone.capacidade_bateria);
+  const specConectividade = formatArrayData(iphone.tipo_conexao);
+  const specConector = formatArrayData(iphone.tipo_conector);
+  const specCamera = formatArrayData(iphone.recursos_camera);
+  const specResistencia = formatArrayData(iphone.resistencia_agua_poeira);
+  const specSO = formatArrayData(iphone.sistema_operacional);
+  const specBiometria = formatArrayData(iphone.biometria);
+  const specDimensoes = formatArrayData(iphone.dimensoes_axlxc);
+  const specPeso = formatArrayData(iphone.peso_g);
+  const specGarantia = formatArrayData(iphone.garantia_meses);
+  const specCondicao = formatArrayData(iphone.condicao_aparelho);
+  const specCores = formatArrayData(iphone.cores_disponiveis);
 
   return (
     <div className={globalStoreStyles.container}>
@@ -196,7 +257,7 @@ export default function IPhoneDetailsPage({ params }) {
 
         <div className={styles.detailsContainer}>
           <div className={styles.imageGallery}>
-            <Image
+            <img
               src={
                 mainImage ||
                 "https://placehold.co/500x500/e0e0e0/333333?text=iPhone"
@@ -208,19 +269,21 @@ export default function IPhoneDetailsPage({ params }) {
             />
 
             <div className={styles.thumbnailGallery}>
-              {iphone.imagens_urls?.map((url, idx) => (
-                <Image
-                  key={idx}
-                  src={url}
-                  alt={`${iphone.nome} - ${idx + 1}`}
-                  width={100}
-                  height={100}
-                  className={`${styles.thumbnail} ${
-                    url === mainImage ? styles.activeThumbnail : ""
-                  }`}
-                  onClick={() => setMainImage(url)}
-                />
-              ))}
+              {iphone.imagens_urls &&
+                Array.isArray(iphone.imagens_urls) &&
+                iphone.imagens_urls.map((url, index) => (
+                  <img
+                    key={index}
+                    src={url}
+                    alt={`${iphone.nome} - ${index + 1}`}
+                    width={100}
+                    height={100}
+                    className={`${styles.thumbnail} ${
+                      url === mainImage ? styles.activeThumbnail : ""
+                    }`}
+                    onClick={() => setMainImage(url)}
+                  />
+                ))}
             </div>
 
             {iphone.video_url && (
@@ -268,7 +331,8 @@ export default function IPhoneDetailsPage({ params }) {
 
             {iphone.opcoes_parcelamento && (
               <p className={styles.installmentOptions}>
-                {formatArrayData(iphone.opcoes_parcelamento)}
+                {formatArrayData(iphone.opcoes_parcelamento) ||
+                  JSON.stringify(iphone.opcoes_parcelamento)}
               </p>
             )}
 
@@ -337,21 +401,91 @@ export default function IPhoneDetailsPage({ params }) {
             <div className={styles.specsSection}>
               <h3 className={styles.sectionHeading}>Especificações Técnicas</h3>
               <ul>
-                {Object.entries(specs).map(
-                  ([key, value]) =>
-                    value && (
-                      <li key={key}>
-                        <span className={styles.negrito}>{key}:</span> {value}
-                      </li>
-                    )
+                {specTela && (
+                  <li>
+                    <span className={styles.negrito}>Tela:</span> {specTela}{" "}
+                    polegadas
+                  </li>
+                )}
+                {specChip && (
+                  <li>
+                    <span className={styles.negrito}>Chip:</span> {specChip}
+                  </li>
+                )}
+                {specBateria && (
+                  <li>
+                    <span className={styles.negrito}>Bateria:</span>{" "}
+                    {specBateria}
+                  </li>
+                )}
+                {specConectividade && (
+                  <li>
+                    <span className={styles.negrito}>Conectividade:</span>{" "}
+                    {specConectividade}
+                  </li>
+                )}
+                {specConector && (
+                  <li>
+                    <span className={styles.negrito}>Conector:</span>{" "}
+                    {specConector}
+                  </li>
+                )}
+                {specCamera && (
+                  <li>
+                    <span className={styles.negrito}>Câmera:</span> {specCamera}
+                  </li>
+                )}
+                {specResistencia && (
+                  <li>
+                    <span className={styles.negrito}>Resistência:</span>{" "}
+                    {specResistencia}
+                  </li>
+                )}
+                {specSO && (
+                  <li>
+                    <span className={styles.negrito}>Sistema Operacional:</span>{" "}
+                    {specSO}
+                  </li>
+                )}
+                {specBiometria && (
+                  <li>
+                    <span className={styles.negrito}>Biometria:</span>{" "}
+                    {specBiometria}
+                  </li>
+                )}
+                {specDimensoes && (
+                  <li>
+                    <span className={styles.negrito}>Dimensões (AxLxP):</span>{" "}
+                    {specDimensoes} cm
+                  </li>
+                )}
+                {specPeso && (
+                  <li>
+                    <span className={styles.negrito}>Peso:</span> {specPeso}g
+                  </li>
+                )}
+                {specGarantia && (
+                  <li>
+                    <span className={styles.negrito}>Garantia:</span>{" "}
+                    {specGarantia} meses
+                  </li>
+                )}
+                {specCondicao && (
+                  <li>
+                    <span className={styles.negrito}>Condição:</span>{" "}
+                    {specCondicao}
+                  </li>
+                )}
+                {specCores && (
+                  <li>
+                    <span className={styles.negrito}>Cores:</span> {specCores}
+                  </li>
                 )}
               </ul>
             </div>
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 }
