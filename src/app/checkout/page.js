@@ -1,3 +1,4 @@
+// src/app/checkout/page.js
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
@@ -14,15 +15,12 @@ import { onAuthStateChanged } from "firebase/auth";
 function CheckoutInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const iphoneId = searchParams.get("iphoneId");
   const { showToast } = useToast();
-
-  // 🔹 Pegando parâmetros da URL enviados pela página de detalhes
-  const nome = searchParams.get("nome");
-  const preco = searchParams.get("preco");
-  const imagem = searchParams.get("imagem");
 
   const [iphone, setIphone] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [isProcessingOrder, setIsProcessingOrder] = useState(false);
 
@@ -33,7 +31,7 @@ function CheckoutInner() {
     endereco: "",
   });
 
-  // 🔹 Autenticação Firebase
+  // 🔹 Listener Firebase Auth
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -46,22 +44,30 @@ function CheckoutInner() {
     return () => unsubscribeAuth();
   }, [router, showToast]);
 
-  // 🔹 Inicializa o iPhone com dados da URL
+  // 🔹 Buscar iPhone (mocked)
   useEffect(() => {
-    if (!nome || !preco) {
+    if (!iphoneId) {
       showToast("Nenhum iPhone selecionado para compra.", "error");
       router.push("/");
       return;
     }
 
-    setIphone({
-      nome,
-      preco: parseFloat(preco),
-      imagem: imagem || "/iphone-sample.png",
-      quantidade: 1,
-    });
-    setLoading(false);
-  }, [nome, preco, imagem, router, showToast]);
+    setTimeout(() => {
+      setIphone({
+        id: iphoneId,
+        nome: `iPhone Modelo ${iphoneId}`,
+        preco_promocional: 3499.99,
+        preco_tabela: 3999.99,
+        imagens_urls: ["/iphone-sample.png"],
+      });
+      setLoading(false);
+    }, 800);
+  }, [iphoneId, router, showToast]);
+
+  // 🔹 Total do pedido
+  const total = iphone
+    ? Number(iphone.preco_promocional || iphone.preco_tabela)
+    : 0;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -81,7 +87,6 @@ function CheckoutInner() {
       return;
     }
 
-    // Validação de campos obrigatórios
     if (
       !formData.nome ||
       !formData.email ||
@@ -97,10 +102,9 @@ function CheckoutInner() {
     }
 
     try {
-      const whatsappNumber = "5511950887080"; // Substitua pelo número real
+      const whatsappNumber = "5511950887080"; // Substitua pelo seu número real
       const precoFormatado = total.toFixed(2).replace(".", ",");
 
-      // Cria a mensagem para WhatsApp com emojis e quebras de linha codificadas
       const message = `
 🛒 *Novo Pedido*
 
@@ -112,11 +116,8 @@ function CheckoutInner() {
 📧 Email: ${formData.email}
 📞 Telefone: ${formData.telefone}
 🏠 Endereço: ${formData.endereco}
-    `
-        .trim() // remove espaços extras do início/fim
-        .replace(/\n/g, "%0A"); // converte quebras de linha para URL
+      `;
 
-      // Gera link do WhatsApp
       const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
         message
       )}`;
@@ -126,7 +127,6 @@ function CheckoutInner() {
         "success"
       );
 
-      // Redireciona para o WhatsApp
       window.location.href = whatsappLink;
     } catch (error) {
       console.error("Erro ao gerar link do WhatsApp:", error);
@@ -139,6 +139,7 @@ function CheckoutInner() {
     }
   };
 
+  // 🔹 Loading
   if (loading) {
     return (
       <div className={globalStoreStyles.container}>
@@ -161,6 +162,31 @@ function CheckoutInner() {
     );
   }
 
+  // 🔹 Erro
+  if (error) {
+    return (
+      <div className={globalStoreStyles.container}>
+        <header className={globalStoreStyles.header}>
+          <Link href="/" className={globalStoreStyles.logoLink}>
+            <img
+              src="/iphone-logo.png"
+              alt="iPhones Pro Store Logo"
+              className={globalStoreStyles.logoImage}
+            />
+          </Link>
+        </header>
+        <div className={globalStoreStyles.content}>
+          <h2 className={globalStoreStyles.pageTitle}>Erro no Checkout</h2>
+          <p className={globalStoreStyles.errorMessage}>Erro: {error}</p>
+          <p className={globalStoreStyles.noProductsMessage}>
+            Voltar para a <Link href="/">loja</Link>.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // 🔹 Render principal
   return (
     <div className={globalStoreStyles.container}>
       <header className={globalStoreStyles.header}>
@@ -179,6 +205,7 @@ function CheckoutInner() {
         <div className={styles.checkoutContainer}>
           <form onSubmit={handlePlaceOrder} className={styles.checkoutForm}>
             <h3 className={styles.sectionTitle}>Seus Dados</h3>
+
             <div className={styles.formGroup}>
               <label htmlFor="nome">Nome Completo *</label>
               <input
@@ -191,6 +218,7 @@ function CheckoutInner() {
                 className={styles.inputField}
               />
             </div>
+
             <div className={styles.formGroup}>
               <label htmlFor="email">E-mail *</label>
               <input
@@ -203,6 +231,7 @@ function CheckoutInner() {
                 className={styles.inputField}
               />
             </div>
+
             <div className={styles.formGroup}>
               <label htmlFor="telefone">Telefone *</label>
               <input
@@ -216,6 +245,7 @@ function CheckoutInner() {
                 placeholder="(XX) XXXXX-XXXX"
               />
             </div>
+
             <div className={styles.formGroup}>
               <label htmlFor="endereco">Endereço Completo *</label>
               <textarea
@@ -245,24 +275,25 @@ function CheckoutInner() {
               <div className={styles.summaryItems}>
                 <div className={styles.summaryItem}>
                   <img
-                    src={iphone.imagem}
+                    src={
+                      iphone.imagens_urls?.[0] ||
+                      "https://placehold.co/60x60/e0e0e0/333333?text=iPhone"
+                    }
                     alt={iphone.nome}
                     className={styles.summaryItemImage}
                   />
                   <div className={styles.summaryItemDetails}>
                     <p className={styles.summaryItemName}>{iphone.nome}</p>
-                    <p className={styles.summaryItemQuantity}>
-                      Quantidade: {iphone.quantidade}
-                    </p>
+                    <p className={styles.summaryItemQuantity}>Quantidade: 1</p>
                     <p className={styles.summaryItemPrice}>
-                      R$ {iphone.preco.toFixed(2).replace(".", ",")}
+                      R$ {total.toFixed(2).replace(".", ",")}
                     </p>
                   </div>
                 </div>
               </div>
               <div className={styles.summaryTotalRow}>
                 <span>Total:</span>
-                <span>R$ {iphone.preco.toFixed(2).replace(".", ",")}</span>
+                <span>R$ {total.toFixed(2).replace(".", ",")}</span>
               </div>
             </div>
           )}
