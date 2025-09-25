@@ -81,6 +81,7 @@ function CheckoutInner() {
       return;
     }
 
+    // Validação de campos obrigatórios
     if (
       !formData.nome ||
       !formData.email ||
@@ -96,22 +97,26 @@ function CheckoutInner() {
     }
 
     try {
-      const whatsappNumber = "5511950887080"; // Número da loja
-      const precoFormatado = iphone.preco.toFixed(2).replace(".", ",");
+      const whatsappNumber = "5511950887080"; // Substitua pelo número real
+      const precoFormatado = total.toFixed(2).replace(".", ",");
 
+      // Cria a mensagem para WhatsApp com emojis e quebras de linha codificadas
       const message = `
-\u{1F6D2} *Novo Pedido*
+🛒 *Novo Pedido*
 
-\u{1F4F1} Produto: ${iphone.nome}
-\u{1F4E6} Quantidade: ${iphone.quantidade}
-\u{1F4B0} Preço: R$ ${precoFormatado}
+📱 Produto: ${iphone.nome}
+📦 Quantidade: 1
+💰 Preço: R$ ${precoFormatado}
 
-\u{1F464} Nome: ${formData.nome}
-\u{1F4E7} Email: ${formData.email}
-\u{1F4DE} Telefone: ${formData.telefone}
-\u{1F3E0} Endereço: ${formData.endereco}
-      `;
+👤 Nome: ${formData.nome}
+📧 Email: ${formData.email}
+📞 Telefone: ${formData.telefone}
+🏠 Endereço: ${formData.endereco}
+    `
+        .trim() // remove espaços extras do início/fim
+        .replace(/\n/g, "%0A"); // converte quebras de linha para URL
 
+      // Gera link do WhatsApp
       const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
         message
       )}`;
@@ -121,6 +126,7 @@ function CheckoutInner() {
         "success"
       );
 
+      // Redireciona para o WhatsApp
       window.location.href = whatsappLink;
     } catch (error) {
       console.error("Erro ao gerar link do WhatsApp:", error);
