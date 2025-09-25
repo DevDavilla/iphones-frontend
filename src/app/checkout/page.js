@@ -100,16 +100,16 @@ function CheckoutInner() {
       const precoFormatado = iphone.preco.toFixed(2).replace(".", ",");
 
       const message = `
-🛒 *Novo Pedido*
+\u{1F6D2} *Novo Pedido*
 
-📱 Produto: ${iphone.nome}
-📦 Quantidade: ${iphone.quantidade}
-💰 Preço: R$ ${precoFormatado}
+\u{1F4F1} Produto: ${iphone.nome}
+\u{1F4E6} Quantidade: ${iphone.quantidade}
+\u{1F4B0} Preço: R$ ${precoFormatado}
 
-👤 Nome: ${formData.nome}
-📧 Email: ${formData.email}
-📞 Telefone: ${formData.telefone}
-🏠 Endereço: ${formData.endereco}
+\u{1F464} Nome: ${formData.nome}
+\u{1F4E7} Email: ${formData.email}
+\u{1F4DE} Telefone: ${formData.telefone}
+\u{1F3E0} Endereço: ${formData.endereco}
       `;
 
       const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
