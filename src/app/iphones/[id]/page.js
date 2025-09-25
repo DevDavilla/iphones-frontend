@@ -34,7 +34,6 @@ export default function IPhoneDetailsPage({ params }) {
         const data = await response.json();
 
         if (response.ok) {
-          // API pode retornar { iphone: { ... } } ou diretamente o objeto
           const phone = data.iphone ? data.iphone : data;
           setIphone(phone);
 
@@ -56,56 +55,46 @@ export default function IPhoneDetailsPage({ params }) {
   }, [id]);
 
   const handleGoToCheckout = () => {
-    if (iphone) {
-      router.push(`/checkout?iphoneId=${iphone.id}`);
-    } else {
+    if (!iphone) {
       alert("Não foi possível iniciar a compra: iPhone não carregado.");
+      return;
     }
+
+    const nome = iphone.nome;
+    const preco = iphone.preco_promocional || iphone.preco_tabela;
+    const imagem = iphone.imagens_urls?.[0] || "";
+
+    const url = `/checkout?nome=${encodeURIComponent(
+      nome
+    )}&preco=${encodeURIComponent(preco)}&imagem=${encodeURIComponent(imagem)}`;
+
+    router.push(url);
   };
 
-  /**
-   * Função robusta para normalizar/formatar campos que podem chegar:
-   * - string normal
-   * - string com JSON escapado ("{\"Face ID\"}")
-   * - array []
-   * - objeto {}
-   * - number / boolean
-   *
-   * Retorna:
-   * - string formatada (ex: "Face ID", "Azul, Verde")
-   * - null quando não houver dados úteis (para ocultar a linha)
-   */
   const formatArrayData = (data) => {
     if (data === null || data === undefined) return null;
 
-    // números e booleanos: converte para string
     if (typeof data === "number" || typeof data === "boolean") {
-      // trata 0 como valor válido (se você não quiser mostrar 0, ajuste aqui)
       return String(data);
     }
 
-    // strings
     if (typeof data === "string") {
       const trimmed = data.trim();
       if (trimmed === "") return null;
 
-      // tenta detectar JSON válido (array ou objeto ou mesmo string JSON)
       if (
         trimmed.startsWith("{") ||
         trimmed.startsWith("[") ||
         trimmed.startsWith('"') ||
         trimmed.startsWith("'") ||
-        /\\\"/.test(trimmed) // strings com escape
+        /\\\"/.test(trimmed)
       ) {
         try {
           const parsed = JSON.parse(trimmed);
-          // delega ao próprio formatArrayData para tratar parsed
           return formatArrayData(parsed);
         } catch (e) {
-          // fallback: limpar caracteres de escape e chaves/brackets soltos
-          // ex.: "{\"Face ID\"}" -> Face ID
           const cleaned = trimmed
-            .replace(/\\+/g, "") // remove backslashes
+            .replace(/\\+/g, "")
             .replace(/^\{/, "")
             .replace(/\}$/, "")
             .replace(/^\[/, "")
@@ -120,13 +109,11 @@ export default function IPhoneDetailsPage({ params }) {
       return trimmed;
     }
 
-    // array
     if (Array.isArray(data)) {
       const arr = data
         .map((item) => {
           if (item === null || item === undefined) return null;
           if (typeof item === "object") {
-            // objeto dentro do array -> pegar valores
             const v = Object.values(item)
               .map((vv) => (vv === null || vv === undefined ? "" : String(vv)))
               .filter(Boolean)
@@ -140,7 +127,6 @@ export default function IPhoneDetailsPage({ params }) {
       return arr.length > 0 ? arr.join(", ") : null;
     }
 
-    // objeto simples
     if (typeof data === "object") {
       const vals = Object.values(data)
         .map((v) => {
@@ -153,7 +139,6 @@ export default function IPhoneDetailsPage({ params }) {
       return vals.length > 0 ? vals.join(", ") : null;
     }
 
-    // fallback
     try {
       return String(data);
     } catch {
@@ -237,7 +222,7 @@ export default function IPhoneDetailsPage({ params }) {
     );
   }
 
-  // Normaliza/formatar todas as specs que podem vir como objetos/arrays/strings
+  // Normaliza specs
   const specTela = formatArrayData(iphone.tamanho_tela_polegadas);
   const specChip = formatArrayData(iphone.processador_chip);
   const specBateria = formatArrayData(iphone.capacidade_bateria);
@@ -272,7 +257,6 @@ export default function IPhoneDetailsPage({ params }) {
 
         <div className={styles.detailsContainer}>
           <div className={styles.imageGallery}>
-            {/* <img /> usado para imagens externas */}
             <img
               src={
                 mainImage ||
@@ -287,7 +271,6 @@ export default function IPhoneDetailsPage({ params }) {
             <div className={styles.thumbnailGallery}>
               {iphone.imagens_urls &&
                 Array.isArray(iphone.imagens_urls) &&
-                iphone.imagens_urls.length > 0 &&
                 iphone.imagens_urls.map((url, index) => (
                   <img
                     key={index}

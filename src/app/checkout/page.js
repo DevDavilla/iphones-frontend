@@ -1,4 +1,3 @@
-// src/app/checkout/page.js
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
@@ -11,18 +10,19 @@ import { useToast } from "../../components/Toast/ToastContext";
 
 import { auth } from "../firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
-import { itemAxisPredicate } from "recharts/types/state/selectors/axisSelectors";
 
-// 🔹 Componente interno que usa `useSearchParams`
 function CheckoutInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const iphoneId = searchParams.get("iphoneId");
   const { showToast } = useToast();
+
+  // 🔹 Pegando parâmetros da URL enviados pela página de detalhes
+  const nome = searchParams.get("nome");
+  const preco = searchParams.get("preco");
+  const imagem = searchParams.get("imagem");
 
   const [iphone, setIphone] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [isProcessingOrder, setIsProcessingOrder] = useState(false);
 
@@ -33,53 +33,35 @@ function CheckoutInner() {
     endereco: "",
   });
 
-  // Listener para o userId do Firebase
+  // 🔹 Autenticação Firebase
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUserId(user.uid);
       } else {
-        showToast(
-          "Você precisa selecionar um iPhone para finalizar a compra.",
-          "info"
-        );
+        showToast("Você precisa estar logado para finalizar a compra.", "info");
         router.push("/");
       }
     });
     return () => unsubscribeAuth();
   }, [router, showToast]);
 
-  // Efeito para buscar os detalhes do iPhone (mockado no front — sem backend)
+  // 🔹 Inicializa o iPhone com dados da URL
   useEffect(() => {
-    if (!iphoneId) {
+    if (!nome || !preco) {
       showToast("Nenhum iPhone selecionado para compra.", "error");
       router.push("/");
       return;
     }
 
-    try {
-      // Aqui você pode adaptar para buscar de um JSON ou localStorage
-      // Por enquanto, simula carregamento
-      setTimeout(() => {
-        setIphone({
-          id: iphoneId,
-          nome: `iPhone Modelo ${iphoneId}`,
-          preco_promocional: 3499.99,
-          preco_tabela: 3999.99,
-          imagens_urls: ["/iphone-sample.png"],
-        });
-        setLoading(false);
-      }, 800);
-    } catch (err) {
-      console.error(`Erro ao carregar iPhone ${iphoneId}:`, err);
-      setError("Erro de conexão ao carregar iPhone para checkout.");
-      setLoading(false);
-    }
-  }, [iphoneId, router, showToast]);
-
-  const total = iphone
-    ? Number(iphone.preco_promocional || iphone.preco_tabela)
-    : 0;
+    setIphone({
+      nome,
+      preco: parseFloat(preco),
+      imagem: imagem || "/iphone-sample.png",
+      quantidade: 1,
+    });
+    setLoading(false);
+  }, [nome, preco, imagem, router, showToast]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -114,15 +96,14 @@ function CheckoutInner() {
     }
 
     try {
-      // Número de WhatsApp da loja (DDI + DDD + número)
-      const whatsappNumber = "5511950887080"; // 🔹 Substitua pelo seu número real
-      const precoFormatado = total.toFixed(2).replace(".", ",");
+      const whatsappNumber = "5511950887080"; // Número da loja
+      const precoFormatado = iphone.preco.toFixed(2).replace(".", ",");
 
       const message = `
 🛒 *Novo Pedido*
 
-📱 Produto: ${item.name}
-📦 Quantidade: 1
+📱 Produto: ${iphone.nome}
+📦 Quantidade: ${iphone.quantidade}
 💰 Preço: R$ ${precoFormatado}
 
 👤 Nome: ${formData.nome}
@@ -152,7 +133,6 @@ function CheckoutInner() {
     }
   };
 
-  // 🔹 Loading
   if (loading) {
     return (
       <div className={globalStoreStyles.container}>
@@ -175,31 +155,6 @@ function CheckoutInner() {
     );
   }
 
-  // 🔹 Erro
-  if (error) {
-    return (
-      <div className={globalStoreStyles.container}>
-        <header className={globalStoreStyles.header}>
-          <Link href="/" className={globalStoreStyles.logoLink}>
-            <img
-              src="/iphone-logo.png"
-              alt="iPhones Pro Store Logo"
-              className={globalStoreStyles.logoImage}
-            />
-          </Link>
-        </header>
-        <div className={globalStoreStyles.content}>
-          <h2 className={globalStoreStyles.pageTitle}>Erro no Checkout</h2>
-          <p className={globalStoreStyles.errorMessage}>Erro: {error}</p>
-          <p className={globalStoreStyles.noProductsMessage}>
-            Voltar para a <Link href="/">loja</Link>.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // 🔹 Render principal
   return (
     <div className={globalStoreStyles.container}>
       <header className={globalStoreStyles.header}>
@@ -284,25 +239,24 @@ function CheckoutInner() {
               <div className={styles.summaryItems}>
                 <div className={styles.summaryItem}>
                   <img
-                    src={
-                      iphone.imagens_urls?.[0] ||
-                      "https://placehold.co/60x60/e0e0e0/333333?text=iPhone"
-                    }
+                    src={iphone.imagem}
                     alt={iphone.nome}
                     className={styles.summaryItemImage}
                   />
                   <div className={styles.summaryItemDetails}>
                     <p className={styles.summaryItemName}>{iphone.nome}</p>
-                    <p className={styles.summaryItemQuantity}>Quantidade: 1</p>
+                    <p className={styles.summaryItemQuantity}>
+                      Quantidade: {iphone.quantidade}
+                    </p>
                     <p className={styles.summaryItemPrice}>
-                      R$ {total.toFixed(2).replace(".", ",")}
+                      R$ {iphone.preco.toFixed(2).replace(".", ",")}
                     </p>
                   </div>
                 </div>
               </div>
               <div className={styles.summaryTotalRow}>
                 <span>Total:</span>
-                <span>R$ {total.toFixed(2).replace(".", ",")}</span>
+                <span>R$ {iphone.preco.toFixed(2).replace(".", ",")}</span>
               </div>
             </div>
           )}
